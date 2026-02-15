@@ -1,9 +1,28 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
+// Helper para garantir a recuperação da chave em qualquer ambiente (Vercel/Local)
+const getApiKey = (): string => {
+  // 1. Tenta via Vite nativo (Padrão Vercel/Netlify)
+  const viteKey = import.meta.env.VITE_API_KEY;
+  if (viteKey) return viteKey;
+
+  // 2. Tenta via substituição de build (Fallback)
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      return process.env.API_KEY;
+  }
+  
+  return "";
+};
+
 // Analysis for GIS context (Relatório Geral)
 export const analyzeSitePhoto = async (base64Image: string, mimeType: string): Promise<string> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = getApiKey();
+    if (!apiKey) {
+        throw new Error("API Key não configurada. Configure VITE_API_KEY no Vercel.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -35,7 +54,7 @@ export const analyzeSitePhoto = async (base64Image: string, mimeType: string): P
     console.error("AI Analysis Failed Detailed:", error);
     
     if (error.message?.includes("API Key")) {
-        return "Erro de Configuração: Chave de API não encontrada.";
+        return "Erro de Configuração: Chave de API ausente (Vercel Env Var).";
     }
     if (error.message?.includes("403")) {
         return "Erro de Permissão: Verifique se a Chave de API é válida e tem saldo/créditos no Google AI Studio.";
@@ -55,7 +74,12 @@ export interface DetectionResult {
 // Search/Detection specific object in photo (Busca Específica com Coordenadas)
 export const detectObjectInPhoto = async (base64Image: string, mimeType: string, query: string): Promise<DetectionResult> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = getApiKey();
+    if (!apiKey) {
+        return { found: false, reason: "API Key não configurada no servidor.", boxes: [] };
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -106,9 +130,7 @@ export const detectObjectInPhoto = async (base64Image: string, mimeType: string,
     const text = response.text?.trim();
     if (!text) return { found: false, reason: "Sem resposta do modelo", boxes: [] };
 
-    // Limpeza extra caso o modelo ainda envie markdown (embora o responseSchema evite isso)
     const cleanText = text.replace(/```json\s*|\s*```/g, "");
-
     return JSON.parse(cleanText) as DetectionResult;
 
   } catch (error: any) {

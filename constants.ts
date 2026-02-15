@@ -5,38 +5,36 @@ export const APP_CONFIG = {
   APP_SUBTITLE: "Digital Twin Platform"
 };
 
-/**
- * Converte um link de visualização do Google Drive em link direto de download
- */
-const getDriveDirectLink = (id: string) => `https://docs.google.com/uc?export=download&id=${id}`;
-
 export const DEMO_DATA_URLS = {
-    // Arquivo Splat Pequeno (Nike Shoe)
-    SPLAT: "https://antimatter15.com/splat/nike.splat",
+    // 1. GAUSSIAN SPLAT / NUVEM DE PONTOS
+    // Se o arquivo for < 100MB, coloque em public/demo/model.splat e use: "/demo/model.splat"
+    // Se for maior, use uma URL externa confiável (HuggingFace, AWS S3) com CORS habilitado.
+    SPLAT: "https://antimatter15.com/splat/nike.splat", 
     
-    // Conjunto de Imagens usando o Google Drive fornecido pelo usuário
+    // 2. IMAGENS
+    // Coloque suas imagens na pasta 'public/demo' do projeto.
+    // O Vercel servirá elas automaticamente.
     DEMO_IMAGES: [
         {
-            filename: "DJI_V_0013.JPG",
-            // ID extraído do seu link do Google Drive
-            url: getDriveDirectLink("1Yqk_Hz-pxk5WGxB_mnHT4CrTeQgV09ab"),
+            filename: "INS_AERIA_001.jpg",
+            url: "/demo/foto1.jpg", // Certifique-se de ter um arquivo foto1.jpg em public/demo
             lat: -22.8958, 
             lng: -43.1822,
-            analysis: "Inspeção de infraestrutura: Cobertura principal do galpão industrial (Dados via Google Drive)."
+            analysis: "Inspeção de infraestrutura: Cobertura principal do galpão industrial. Identificado desgaste natural nas telhas metálicas."
         },
         {
-            filename: "DJI_V_0160.JPG",
-            url: getDriveDirectLink("1Yqk_Hz-pxk5WGxB_mnHT4CrTeQgV09ab"), // Usando o mesmo como exemplo até ter os outros IDs
+            filename: "INS_AERIA_002.jpg",
+            url: "/demo/foto2.jpg", // Certifique-se de ter um arquivo foto2.jpg em public/demo
             lat: -22.8962,
             lng: -43.1815,
-            analysis: "Visão oblíqua: Acessos e pátio de manobras."
+            analysis: "Visão oblíqua: Acessos e pátio de manobras. Sem obstruções visíveis nas vias de acesso."
         },
         {
-            filename: "DJI_V_0405.JPG",
-            url: getDriveDirectLink("1Yqk_Hz-pxk5WGxB_mnHT4CrTeQgV09ab"), // Usando o mesmo como exemplo até ter os outros IDs
+            filename: "INS_AERIA_003.jpg",
+            url: "/demo/foto3.jpg", // Certifique-se de ter um arquivo foto3.jpg em public/demo
             lat: -22.8965,
             lng: -43.1828,
-            analysis: "Análise perimetral: Muros de contenção e vegetação rasteira."
+            analysis: "Análise perimetral: Muros de contenção e vegetação rasteira. Necessária poda preventiva no setor Norte."
         }
     ]
 };
