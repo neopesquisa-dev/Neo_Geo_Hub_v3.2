@@ -6,35 +6,26 @@ export const APP_CONFIG = {
 };
 
 export const DEMO_DATA_URLS = {
-    // 1. GAUSSIAN SPLAT / NUVEM DE PONTOS
-    // Se o arquivo for < 100MB, coloque em public/demo/model.splat e use: "/demo/model.splat"
-    // Se for maior, use uma URL externa confiável (HuggingFace, AWS S3) com CORS habilitado.
-    SPLAT: "https://antimatter15.com/splat/nike.splat", 
+    // Usando GitHub Raw para evitar bloqueio de CORS do Google Drive
+    // Nota: Os espaços e caracteres especiais (+, espaço) devem estar codificados na URL
     
-    // 2. IMAGENS
-    // Coloque suas imagens na pasta 'public/demo' do projeto.
-    // O Vercel servirá elas automaticamente.
+    // 1. GAUSSIAN SPLAT
+    // Arquivo: PLAT_5 3DGS_SplatFile.splat
+    SPLAT: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/PLAT_5%203DGS_SplatFile.splat", 
+    
+    // 2. NUVEM DE PONTOS
+    // Arquivo: Sub_Fx_1passada_Ground+Linha_1_ply.ply
+    POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",
+
+    // 3. IMAGENS
+    // Arquivo: DJI_20250307143535_0003_V.JPG
     DEMO_IMAGES: [
         {
-            filename: "INS_AERIA_001.jpg",
-            url: "/demo/foto1.jpg", // Certifique-se de ter um arquivo foto1.jpg em public/demo
-            lat: -22.8958, 
-            lng: -43.1822,
-            analysis: "Inspeção de infraestrutura: Cobertura principal do galpão industrial. Identificado desgaste natural nas telhas metálicas."
-        },
-        {
-            filename: "INS_AERIA_002.jpg",
-            url: "/demo/foto2.jpg", // Certifique-se de ter um arquivo foto2.jpg em public/demo
-            lat: -22.8962,
-            lng: -43.1815,
-            analysis: "Visão oblíqua: Acessos e pátio de manobras. Sem obstruções visíveis nas vias de acesso."
-        },
-        {
-            filename: "INS_AERIA_003.jpg",
-            url: "/demo/foto3.jpg", // Certifique-se de ter um arquivo foto3.jpg em public/demo
-            lat: -22.8965,
-            lng: -43.1828,
-            analysis: "Análise perimetral: Muros de contenção e vegetação rasteira. Necessária poda preventiva no setor Norte."
+            filename: "DJI_20250307143535_0003_V.JPG",
+            url: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/DJI_20250307143535_0003_V.JPG",
+            lat: -22.8958, // Fallback caso EXIF falhe
+            lng: -43.1822, // Fallback caso EXIF falhe
+            // analysis removido para permitir o uso do botão de análise na interface
         }
     ]
 };
@@ -115,7 +106,7 @@ export const TRANSLATIONS = {
     prop_no_sel: 'Select a layer',
     prop_dataset: 'Info',
     prop_filename: 'NAME',
-    prop_type: 'TYPE',
+    prop_type: 'TIPO',
     prop_date: 'DATE',
     prop_crs_title: 'Coordinates',
     prop_crs_label: 'EPSG',

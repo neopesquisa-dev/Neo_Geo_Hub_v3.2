@@ -232,20 +232,25 @@ const App: React.FC = () => {
     if (wsId !== 'demo-session') return;
     
     setDbLoading(true);
+    console.log("Iniciando carregamento da Demo...");
+
     try {
         const existingLayers = await db.layers.where('workspaceId').equals(wsId).toArray();
         for (const l of existingLayers) {
             await deleteLayerFromDB(l.id);
         }
 
-        // Carregar Splat Demo
+        // 1. Carregar Splat Demo
         try {
+            console.log("Buscando Splat:", DEMO_DATA_URLS.SPLAT);
             const splatResponse = await fetch(DEMO_DATA_URLS.SPLAT);
+            if (!splatResponse.ok) throw new Error(`Fetch error: ${splatResponse.status}`);
             const splatBlob = await splatResponse.blob();
+            
             const splatLayer: GaussianSplatLayer = {
                 id: `layer-demo-splat-${Date.now()}`,
                 workspaceId: wsId,
-                name: "Modelo Industrial (Demo)",
+                name: "Modelo 3DGS (PLAT_5)",
                 type: 'GAUSSIAN_SPLAT',
                 visible: true,
                 opacity: 1,
@@ -256,28 +261,78 @@ const App: React.FC = () => {
                 fileSize: splatBlob.size
             };
             await saveLayerToDB(splatLayer, splatBlob);
-        } catch (e) { console.warn("Splat demo load fail"); }
+            console.log("Splat carregado com sucesso.");
+        } catch (e) { 
+            console.error("Splat demo load fail", e); 
+        }
 
-        // Carregar Fotos Demo
+        // 2. Carregar Nuvem de Pontos Demo
+        try {
+            // @ts-ignore - Point Cloud URL
+            const cloudUrl = DEMO_DATA_URLS.POINT_CLOUD;
+            if (cloudUrl) {
+                console.log("Buscando Point Cloud:", cloudUrl);
+                const pcResponse = await fetch(cloudUrl);
+                if (!pcResponse.ok) throw new Error(`Fetch error: ${pcResponse.status}`);
+                const pcBlob = await pcResponse.blob();
+                
+                const pcLayer: PointCloudLayer = {
+                    id: `layer-demo-pc-${Date.now()}`,
+                    workspaceId: wsId,
+                    name: "Nuvem de Pontos (Sub_Fx)",
+                    type: 'POINT_CLOUD',
+                    visible: true,
+                    opacity: 1,
+                    date: new Date().toISOString(),
+                    pointCount: 0, // Será calculado ao abrir
+                    format: 'PLY'
+                };
+                await saveLayerToDB(pcLayer, pcBlob);
+                console.log("Point Cloud carregada com sucesso.");
+            }
+        } catch (e) { 
+            console.error("Point Cloud demo load fail", e); 
+        }
+
+        // 3. Carregar Fotos Demo
         const demoImages: GeoImage[] = [];
         for (const [idx, imgData] of DEMO_DATA_URLS.DEMO_IMAGES.entries()) {
-            const imgId = `img-demo-${idx}-${Date.now()}`;
-            demoImages.push({
-                id: imgId,
-                filename: imgData.filename,
-                url: imgData.url, 
-                lat: imgData.lat,
-                lng: imgData.lng,
-                timestamp: Date.now(),
-                analysis: imgData.analysis
-            });
+            try {
+                console.log("Buscando Imagem:", imgData.url);
+                const res = await fetch(imgData.url);
+                if (!res.ok) {
+                    console.warn(`Imagem fetch error: ${res.status}`);
+                    continue;
+                }
+                const blob = await res.blob();
+                
+                // Tenta extrair EXIF real, usa fallback do constants se falhar
+                const exifData = await getExifDataFromBlob(blob);
+                const realLat = exifData.lat ?? imgData.lat;
+                const realLng = exifData.lng ?? imgData.lng;
+                
+                const imgId = `img-demo-${idx}-${Date.now()}`;
+                await db.files.put({ id: imgId, data: blob, type: blob.type });
+
+                demoImages.push({
+                    id: imgId,
+                    filename: imgData.filename,
+                    url: URL.createObjectURL(blob), 
+                    lat: realLat,
+                    lng: realLng,
+                    timestamp: Date.now(),
+                    analysis: undefined // Forçar undefined para que o botão de análise apareça
+                });
+            } catch (e) {
+                console.warn(`Failed to load demo image: ${imgData.filename}`, e);
+            }
         }
 
         if (demoImages.length > 0) {
             const imgLayer: PhotoLayer = {
                  id: `layer-demo-photo-${Date.now()}`,
                  workspaceId: wsId,
-                 name: "Fotos Inspeção Drone",
+                 name: "Fotos Inspeção DJI",
                  type: 'PHOTO_SET',
                  visible: true,
                  opacity: 1,
@@ -288,9 +343,10 @@ const App: React.FC = () => {
         }
 
         await loadLayersForWorkspace(wsId);
-        setState(prev => ({ ...prev, viewMode: ViewMode.MODE_MAP }));
+        setState(prev => ({ ...prev, viewMode: ViewMode.MODE_3D }));
     } catch (e) {
-        console.error("Demo Load Failure", e);
+        console.error("Demo Load Critical Failure", e);
+        alert("Erro crítico ao carregar demo. Verifique o console para detalhes de rede.");
     } finally {
         setDbLoading(false);
     }

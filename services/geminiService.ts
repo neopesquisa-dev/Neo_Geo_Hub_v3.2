@@ -1,17 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Helper para garantir a recuperação da chave em qualquer ambiente (Vercel/Local)
+// Helper para garantir a recuperação da chave
+// A chave é injetada via 'define' no vite.config.ts, substituindo process.env.API_KEY pelo valor real.
 const getApiKey = (): string => {
-  // 1. Tenta via Vite nativo (Padrão Vercel/Netlify)
-  const viteKey = import.meta.env.VITE_API_KEY;
-  if (viteKey) return viteKey;
-
-  // 2. Tenta via substituição de build (Fallback)
-  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
-      return process.env.API_KEY;
-  }
-  
-  return "";
+  return process.env.API_KEY || "";
 };
 
 // Analysis for GIS context (Relatório Geral)
@@ -19,7 +11,7 @@ export const analyzeSitePhoto = async (base64Image: string, mimeType: string): P
   try {
     const apiKey = getApiKey();
     if (!apiKey) {
-        throw new Error("API Key não configurada. Configure VITE_API_KEY no Vercel.");
+        throw new Error("API Key não configurada. Verifique o arquivo .env e VITE_API_KEY.");
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -54,7 +46,7 @@ export const analyzeSitePhoto = async (base64Image: string, mimeType: string): P
     console.error("AI Analysis Failed Detailed:", error);
     
     if (error.message?.includes("API Key")) {
-        return "Erro de Configuração: Chave de API ausente (Vercel Env Var).";
+        return "Erro de Configuração: Chave de API ausente.";
     }
     if (error.message?.includes("403")) {
         return "Erro de Permissão: Verifique se a Chave de API é válida e tem saldo/créditos no Google AI Studio.";
