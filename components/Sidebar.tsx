@@ -1,7 +1,7 @@
 
 import React, { useRef, useState } from 'react';
 import { Layer, AppSettings, Workspace } from '../types';
-import { Eye, EyeOff, Upload, Grid, ChevronDown, Database, Tag, Trash2, Aperture, Info, PlayCircle, Camera, Download, Cloud, Save, RotateCw } from 'lucide-react';
+import { Eye, EyeOff, Upload, Grid, ChevronDown, Database, Tag, Trash2, Aperture, Info, PlayCircle, Camera, Download, Cloud, Save, RotateCw, X } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 
 interface SidebarProps {
@@ -14,6 +14,7 @@ interface SidebarProps {
   onUpload: (files: FileList | null, customName: string, typeHint: 'SPLAT' | 'CLOUD' | 'PHOTO') => void;
   onLoadDemo: () => void;
   settings: AppSettings;
+  onCloseMobile?: () => void;
 }
 
 const GroupHeader: React.FC<{ label: string; formats: string; icon?: React.ReactNode }> = ({ label, formats, icon }) => (
@@ -39,7 +40,7 @@ const GroupHeader: React.FC<{ label: string; formats: string; icon?: React.React
   </div>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ layers, activeLayerId, activeWorkspace, onToggleLayer, onSelectLayer, onDeleteLayer, onUpload, onLoadDemo, settings }) => {
+const Sidebar: React.FC<SidebarProps> = ({ layers, activeLayerId, activeWorkspace, onToggleLayer, onSelectLayer, onDeleteLayer, onUpload, onLoadDemo, settings, onCloseMobile }) => {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const cloudInputRef = useRef<HTMLInputElement>(null);
   const splatInputRef = useRef<HTMLInputElement>(null);
@@ -61,8 +62,17 @@ const Sidebar: React.FC<SidebarProps> = ({ layers, activeLayerId, activeWorkspac
   const isDemoSession = activeWorkspace.id === 'demo-session';
 
   return (
-    <aside className="w-72 bg-[#050505] border-r border-[#222] flex flex-col z-40 hidden md:flex">
+    <aside className="w-72 h-full bg-[#050505] border-r border-[#222] flex flex-col z-40">
       
+      {/* Mobile Close Button */}
+      {onCloseMobile && (
+          <div className="flex md:hidden p-2 justify-end border-b border-[#222]">
+              <button onClick={onCloseMobile} className="text-gray-400 hover:text-white p-2">
+                  <X size={20} />
+              </button>
+          </div>
+      )}
+
       <div className="p-4 border-b border-[#222] space-y-3 bg-[#080808]">
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

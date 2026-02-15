@@ -561,11 +561,16 @@ const App: React.FC = () => {
              ></div>
         )}
 
-        <div className={`${isSidebarOpen ? 'block absolute z-50 h-full w-72' : 'hidden'} md:block h-full shadow-xl transition-all`}>
+        {/* Sidebar container - Mobile Fixed Drawer */}
+        <div className={`
+             fixed inset-y-0 left-0 z-50 w-72 h-full bg-[#050505] shadow-2xl transform transition-transform duration-300 md:static md:transform-none md:shadow-none
+             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
             <Sidebar 
                 layers={state.layers} activeLayerId={state.activeLayerId} activeWorkspace={state.activeWorkspace}
                 onToggleLayer={toggleLayer} onSelectLayer={selectLayer} onDeleteLayer={deleteLayer} 
                 onUpload={handleUpload} onLoadDemo={() => handleLoadDemoData()} settings={state.settings}
+                onCloseMobile={() => setIsSidebarOpen(false)} // Pass close prop
             />
         </div>
 
@@ -582,22 +587,17 @@ const App: React.FC = () => {
            
            {/* MODAL DE DETALHES COM BUSCA VISUAL */}
            {state.selectedImage && (
-             <div className="absolute inset-0 z-[1000] bg-black/95 flex items-center justify-center p-4">
-                <div className="bg-[#111] border border-[#333] rounded-lg max-w-6xl w-full h-[85vh] flex flex-col md:flex-row overflow-hidden shadow-2xl">
+             <div className="absolute inset-0 z-[1000] bg-black/95 flex items-center justify-center p-0 md:p-4">
+                <div className="bg-[#111] border-none md:border md:border-[#333] rounded-none md:rounded-lg w-full h-full md:max-w-6xl md:h-[85vh] flex flex-col md:flex-row overflow-hidden shadow-2xl">
                     
-                    {/* LEFT: Image Viewer */}
-                    <div className="flex-1 bg-black relative flex items-center justify-center group overflow-hidden">
+                    {/* LEFT: Image Viewer (Top on Mobile) */}
+                    <div className="flex-1 bg-black relative flex items-center justify-center group overflow-hidden max-h-[40vh] md:max-h-full shrink-0">
                         <div className="relative w-full h-full flex items-center justify-center">
                             <img src={state.selectedImage.url} className="max-w-full max-h-full object-contain" />
                             
                             {/* Bounding Boxes Overlay */}
                             {detectionResult && detectionResult.boxes && (
                                 <div className="absolute inset-0 pointer-events-none w-full h-full">
-                                    {/* 
-                                      Nota: A sobreposição perfeita depende do aspect ratio. 
-                                      Para simplificar, assumimos que a imagem ocupa o container da melhor forma. 
-                                      Em uma implementação avançada, usaríamos getBoundingClientRect da imagem real.
-                                    */}
                                     {detectionResult.boxes.map((box, i) => (
                                         <div 
                                             key={i}
@@ -620,11 +620,11 @@ const App: React.FC = () => {
                         <button onClick={() => setState(prev => ({...prev, selectedImage: null}))} className="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white hover:bg-white/20 transition-all z-20"><X size={20}/></button>
                     </div>
 
-                    {/* RIGHT: Analysis Panel */}
-                    <div className="w-full md:w-96 bg-[#0a0a0a] border-l border-[#222] flex flex-col">
+                    {/* RIGHT: Analysis Panel (Bottom on Mobile) */}
+                    <div className="w-full md:w-96 bg-[#0a0a0a] border-t md:border-t-0 md:border-l border-[#222] flex flex-col flex-1 overflow-hidden">
                         
                         {/* Tab Switcher */}
-                        <div className="flex border-b border-[#222]">
+                        <div className="flex border-b border-[#222] shrink-0">
                             <button 
                                 onClick={() => setActiveTab('REPORT')}
                                 className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'REPORT' ? 'bg-[#111] text-cyan-400 border-b-2 border-cyan-500' : 'text-gray-500 hover:text-white'}`}

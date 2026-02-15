@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { GaussianSplatLayer } from '../types';
 import * as THREE from 'three';
@@ -185,8 +186,8 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
         </div>
       </div>
 
-      {/* Control Sidebar Panel */}
-      <div className={`absolute top-24 right-6 w-80 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 transition-all duration-300 pointer-events-auto max-h-[75vh] overflow-y-auto custom-scrollbar ${isSettingsOpen ? 'opacity-100' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
+      {/* Control Sidebar Panel - Responsive Width */}
+      <div className={`absolute top-24 right-6 w-full max-w-[280px] md:w-80 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 transition-all duration-300 pointer-events-auto max-h-[75vh] overflow-y-auto custom-scrollbar ${isSettingsOpen ? 'opacity-100' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
           <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <span className="text-[11px] font-bold text-white uppercase tracking-widest flex items-center gap-2">

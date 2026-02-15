@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import { db } from '../db';
-import { Rotate3d, Palette, Database, Layers, Move, Loader2 } from 'lucide-react';
+import { Rotate3d, Palette, Database, Layers, Move, Loader2, Sliders } from 'lucide-react';
 
 interface ViewerProps {
   activeLayer?: Layer;
@@ -35,6 +35,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
   const [colorMode, setColorMode] = useState<'RGB' | 'HEIGHT' | 'CLASS'>('RGB');
   const [isLoading, setIsLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<{count: number, hasClass: boolean, heightRange: [number, number]} | null>(null);
+  const [showControls, setShowControls] = useState(false); // Mobile control toggle
   
   const [transform, setTransform] = useState({
     posX: 0, posY: 0, posZ: 0,
@@ -263,8 +264,16 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
         </div>
       )}
 
+      {/* Toggle Controls Button (Mobile) */}
+      <button 
+        onClick={() => setShowControls(!showControls)}
+        className="absolute top-4 right-4 z-20 p-2 bg-black/60 rounded-full text-white border border-white/20 md:hidden"
+      >
+        <Sliders size={20} />
+      </button>
+
       {/* Control Panel - Adjusted Classes for Theme Compatibility */}
-      <div className="absolute top-4 right-4 flex flex-col gap-3 z-10 w-64 pointer-events-none">
+      <div className={`absolute top-16 md:top-4 right-4 flex flex-col gap-3 z-10 w-64 pointer-events-none transition-all ${showControls ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none md:opacity-100 md:translate-x-0 md:pointer-events-auto'}`}>
           <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-4 pointer-events-auto">
                 <div className="flex flex-col gap-3">
                     <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
@@ -300,7 +309,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
           </div>
       </div>
 
-      <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-[9px] text-gray-400 flex items-center gap-4 transition-all">
+      <div className="absolute bottom-20 md:bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-[9px] text-gray-400 flex items-center gap-4 transition-all pointer-events-none md:pointer-events-auto">
           <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div> POINTS: {debugInfo?.count.toLocaleString() || '---'}</div>
           <div className="w-px h-3 bg-white/10"></div>
           <div className="flex items-center gap-1.5 uppercase tracking-tighter"> Alt: {debugInfo ? `${debugInfo.heightRange[0].toFixed(1)}m a ${debugInfo.heightRange[1].toFixed(1)}m` : '---'}</div>

@@ -24,15 +24,15 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="h-14 md:h-16 bg-[#050505] border-b border-[#222] flex items-center justify-between px-3 md:px-4 z-50 select-none relative transition-colors shrink-0">
-      <div className="flex items-center gap-3 md:gap-6 flex-1">
+      <div className="flex items-center gap-3 md:gap-6 flex-1 min-w-0">
         <button 
-            className="md:hidden text-gray-500 hover:text-white p-1.5 -ml-1.5 rounded-lg active:bg-white/10 transition-colors"
+            className="md:hidden text-gray-500 hover:text-white p-1.5 -ml-1.5 rounded-lg active:bg-white/10 transition-colors shrink-0"
             onClick={toggleSidebar}
         >
             <Menu size={20} />
         </button>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <div className="h-6 md:h-10 w-auto flex items-center">
               <img 
                   src={APP_CONFIG.LOGO_SOURCE}
