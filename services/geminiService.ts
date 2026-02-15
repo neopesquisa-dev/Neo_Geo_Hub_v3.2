@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 // Analysis for GIS context (Relatório Geral)
 export const analyzeSitePhoto = async (base64Image: string, mimeType: string): Promise<string> => {
@@ -71,41 +71,48 @@ export const detectObjectInPhoto = async (base64Image: string, mimeType: string,
             text: `Atue como um sistema de visão computacional.
             Analise a imagem procurando por: "${query}".
             
-            Retorne um JSON estritamente neste formato:
-            {
-              "found": boolean,
-              "reason": "breve explicação em PT-BR",
-              "boxes": [
-                 { "ymin": 0-100, "xmin": 0-100, "ymax": 0-100, "xmax": 0-100, "label": "nome do objeto" }
-              ]
-            }
+            Se encontrar, explique onde e porquê em 'reason'.
+            Se não encontrar, explique o motivo em 'reason'.
             
-            Regras para "boxes":
-            1. Use coordenadas normalizadas de 0 a 100 (porcentagem da imagem).
-            2. Se encontrar o objeto, desenhe a caixa delimitadora (bounding box) estimada.
-            3. Se não encontrar, retorne lista vazia em "boxes".
-            `
+            IMPORTANTE: Para 'boxes', use coordenadas normalizadas (0-100) representando a porcentagem da imagem.`
           }
         ]
       },
       config: {
-          responseMimeType: "application/json"
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              found: { type: Type.BOOLEAN },
+              reason: { type: Type.STRING },
+              boxes: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    ymin: { type: Type.NUMBER },
+                    xmin: { type: Type.NUMBER },
+                    ymax: { type: Type.NUMBER },
+                    xmax: { type: Type.NUMBER },
+                    label: { type: Type.STRING }
+                  }
+                }
+              }
+            }
+          }
       }
     });
 
     const text = response.text?.trim();
-    if (!text) return { found: false, reason: "Sem resposta do modelo" };
+    if (!text) return { found: false, reason: "Sem resposta do modelo", boxes: [] };
 
-    try {
-        return JSON.parse(text);
-    } catch {
-        // Fallback básico
-        const isFound = text.toLowerCase().includes("true");
-        return { found: isFound, reason: text, boxes: [] };
-    }
+    // Limpeza extra caso o modelo ainda envie markdown (embora o responseSchema evite isso)
+    const cleanText = text.replace(/```json\s*|\s*```/g, "");
+
+    return JSON.parse(cleanText) as DetectionResult;
 
   } catch (error: any) {
     console.error("AI Detection Failed:", error);
-    return { found: false, reason: "Erro na análise", boxes: [] };
+    return { found: false, reason: "Erro na análise: " + (error.message || "Desconhecido"), boxes: [] };
   }
 };

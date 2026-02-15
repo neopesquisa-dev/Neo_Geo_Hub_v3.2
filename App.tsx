@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Viewer3D from './components/Viewer3D';
@@ -18,7 +17,7 @@ import { MOCK_USER, DEMO_DATA_URLS } from './constants';
 import * as THREE from 'three';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import { db, saveLayerToDB, deleteLayerFromDB, initWorkspaces } from './db';
-import { useLiveQuery } from 'dexie-react-hooks';
+// useLiveQuery removed as it was unused and causing build issues if missing
 
 // Declare EXIF global from exif-js script
 declare var EXIF: any;

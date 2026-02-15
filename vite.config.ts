@@ -2,8 +2,9 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-  // Carrega variáveis de ambiente baseadas no modo (development/production)
-  // O terceiro argumento '' garante que carregue todas as variáveis, não apenas as com prefixo VITE_
+  // Carrega variáveis de ambiente baseadas no modo
+  // Agora o TypeScript reconhece 'process' nativamente graças à correção no tsconfig.json
+  // Casting process to any to avoid TS error about cwd() missing on type Process
   const env = loadEnv(mode, (process as any).cwd(), '');
   
   return {
@@ -17,17 +18,16 @@ export default defineConfig(({ mode }) => {
       }
     },
     define: {
-      // Garante que o SDK do Google GenAI encontre a chave API corretamente
       // Prioriza VITE_API_KEY, depois tenta GOOGLE_API_KEY ou API_KEY
       'process.env.API_KEY': JSON.stringify(env.VITE_API_KEY || env.GOOGLE_API_KEY || env.API_KEY || '')
     },
     build: {
       outDir: 'dist',
-      sourcemap: false, // Desativa sourcemaps em produção para economizar memória
-      chunkSizeWarningLimit: 1600, // Aumenta limite de aviso para arquivos 3D grandes
+      sourcemap: false,
+      chunkSizeWarningLimit: 2000, // Aumentado para acomodar engines 3D
     },
     optimizeDeps: {
-      exclude: ['@mkkellogg/gaussian-splats-3d'] // Evita otimização excessiva na lib de Splats
+      exclude: ['@mkkellogg/gaussian-splats-3d']
     }
   };
 });
