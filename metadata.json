@@ -1,0 +1,7 @@
+{
+  "name": "Neo Geo Hub .v3",
+  "description": "The ultimate retro-futuristic hub for SNK history, game analysis via vision, and real-world arcade discovery using Gemini Maps Grounding.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

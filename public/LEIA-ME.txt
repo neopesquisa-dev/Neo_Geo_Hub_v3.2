@@ -1,0 +1,6 @@
+
+LOCAL CORRETO PARA A LOGO:
+
+1. Coloque o arquivo 'logo.png' DENTRO desta pasta 'public'.
+2. Não coloque na raiz do projeto junto com o package.json.
+3. O arquivo deve estar aqui para ser acessado como '/logo.png'.

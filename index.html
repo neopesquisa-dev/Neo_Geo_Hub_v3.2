@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Neo Geo Hub .v² - Digital Twin Platform</title>
+    <!-- Tailwind via CDN is fine for simple migration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              yellow: {
+                500: '#CFFF04', /* Neon Yellow Principal */
+                600: '#A4CC00', /* Contraste para Texto */
+                400: '#DBFF4D', /* Hover */
+                900: '#2A3300', /* Fundo profundo */
+              },
+              fuchsia: {
+                500: '#FF00FF',
+              },
+              cyan: {
+                500: '#00FFFF',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- EXIF JS script tag kept for compatibility -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    
+    <!-- Google Fonts: JetBrains Mono (Code/IDE Look), Fira Code (Alt Code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      body {
+        background-color: #000000;
+        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* LIGHT MODE ENGINE */
+      body.light-mode {
+        background-color: #cccccc !important; /* Cinza mais escuro (Silver) para reduzir brilho */
+        color: #171717 !important; /* Neutral 900 */
+      }
+      
+      /* Cabeçalho Específico - Cinza mais evidente */
+      body.light-mode header {
+         background-color: #bfbfbf !important; /* Um pouco mais escuro que o fundo */
+         border-color: #999999 !important;
+         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      
+      /* Sidebar e Painéis - Off-white para destacar do fundo cinza */
+      body.light-mode aside,
+      body.light-mode .bg-\[\#050505\], 
+      body.light-mode .bg-black,
+      body.light-mode .bg-\[\#0a0a0a\],
+      body.light-mode .bg-\[\#080808\],
+      body.light-mode .bg-black\/90,
+      body.light-mode .bg-black\/80 {
+        background-color: #f0f0f0 !important; /* Neutral 100 - Mais claro que o fundo */
+        border-color: #999999 !important; /* Neutral 400 */
+        color: #171717 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+
+      /* Backgrounds Secundários (Inputs, Cards Internos) */
+      body.light-mode .bg-\[\#111\],
+      body.light-mode .bg-\[\#161616\],
+      body.light-mode .bg-\[\#1a1a1a\] {
+        background-color: #e0e0e0 !important; /* Cinza claro para inputs */
+        border-color: #a3a3a3 !important;
+      }
+      
+      /* Transparências */
+      body.light-mode .bg-black\/60,
+      body.light-mode .bg-black\/70,
+      body.light-mode .backdrop-blur-md {
+         background-color: rgba(220, 220, 220, 0.9) !important;
+         border-color: #999999 !important;
+      }
+
+      /* Text Colors */
+      body.light-mode .text-gray-500,
+      body.light-mode .text-gray-400,
+      body.light-mode .text-gray-300 {
+        color: #404040 !important; /* Neutral 700 - Mais contraste */
+      }
+
+      body.light-mode .text-white,
+      body.light-mode .text-gray-200 {
+        color: #000000 !important;
+      }
+      
+      /* Accent Colors - Mantendo tons Neon */
+      body.light-mode .text-yellow-500 { color: #65a30d !important; text-shadow: none; } /* Lime-600 */
+      body.light-mode .text-yellow-400 { color: #4d7c0f !important; }
+      body.light-mode .bg-yellow-500 { background-color: #CFFF04 !important; color: #000000 !important; border: 1px solid #999999; }
+      
+      body.light-mode .text-cyan-400,
+      body.light-mode .text-cyan-500 { color: #0e7490 !important; text-shadow: none; } /* Cyan-700 */
+      body.light-mode .bg-cyan-900\/20, 
+      body.light-mode .bg-cyan-900\/10 { background-color: #06b6d420 !important; border: 1px solid #0e7490; } 
+      body.light-mode .border-cyan-500 { border-color: #0e7490 !important; }
+
+      body.light-mode .text-fuchsia-500,
+      body.light-mode .text-fuchsia-300 { color: #a21caf !important; text-shadow: none; } /* Fuchsia-700 */
+      body.light-mode .bg-fuchsia-900\/10 { background-color: #d946ef20 !important; border: 1px solid #a21caf; }
+      
+      /* Borders */
+      body.light-mode .border-\[\#222\],
+      body.light-mode .border-\[\#333\],
+      body.light-mode .border-white\/10 {
+        border-color: #999999 !important;
+      }
+      
+      /* Typography */
+      .font-code { font-family: 'Fira Code', 'JetBrains Mono', monospace; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
+      
+      /* Scrollbars */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #050505; }
+      ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+      
+      body.light-mode ::-webkit-scrollbar-track { background: #cccccc; }
+      body.light-mode ::-webkit-scrollbar-thumb { background: #737373; }
+
+      .leaflet-container { background: #050505 !important; }
+      body.light-mode .leaflet-container { background: #cccccc !important; }
+      
+      /* Mobile Specific Fixes */
+      @media (max-width: 768px) {
+        .custom-mobile-header-title { display: none; }
+        /* Prevent scroll bounce on iOS */
+        html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "three/": "https://esm.sh/three@^0.182.0/",
+    "three": "https://esm.sh/three@^0.182.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.3",
+    "leaflet": "https://esm.sh/leaflet@^1.9.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "dexie": "https://esm.sh/dexie@^4.3.0",
+    "@mkkellogg/gaussian-splats-3d": "https://esm.sh/@mkkellogg/gaussian-splats-3d@^0.4.7",
+    "dexie-react-hooks": "https://esm.sh/dexie-react-hooks@^4.2.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
