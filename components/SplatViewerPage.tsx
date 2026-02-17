@@ -68,8 +68,11 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
   const [markerText, setMarkerText] = useState("");
 
   useEffect(() => {
-    const currentContainer = containerRef.current;
-    if (!currentContainer || loadedRef.current) return;
+    // Captura a referência do nó no início (closure)
+    const mountNode = containerRef.current;
+    
+    // Evita inicialização dupla no React StrictMode
+    if (!mountNode || loadedRef.current) return;
     loadedRef.current = true;
 
     let viewer: any = null;
@@ -81,11 +84,14 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
         setError(null);
         setProgress(5);
 
+        // Limpa qualquer conteúdo residual antes de iniciar
+        if (mountNode) mountNode.innerHTML = '';
+
         viewer = new SplatViewer({
           'cameraUp': [0, 1, 0], 
           'initialCameraPosition': [0, 5, 10],
           'initialCameraLookAt': [0, 0, 0],
-          'rootElement': currentContainer,
+          'rootElement': mountNode,
           'sharedMemoryForWorkers': window.crossOriginIsolated,
           'useBuiltInControls': true, 
           'dynamicScene': true,
@@ -114,6 +120,8 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
           }
         });
 
+        // Se o componente foi desmontado durante o carregamento, paramos aqui.
+        // NÃO chamamos dispose() aqui, pois o cleanup do useEffect já o fez (ou fará) via viewerRef.
         if (!isMounted) return;
 
         // Adiciona Grupo de Ferramentas à Cena
@@ -149,24 +157,42 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
       }
     };
 
-    const timer = setTimeout(initViewer, 100);
+    // Pequeno delay para garantir que o DOM está pronto
+    const timer = setTimeout(initViewer, 50);
 
     return () => {
       isMounted = false;
       clearTimeout(timer);
-      if (viewer) {
+      
+      const v = viewerRef.current;
+      if (v) {
         try {
-          // Attempt to dispose. Catch specific DOM errors.
-          viewer.dispose();
+          // Tenta limpar suavemente primeiro
+          if (v.stop) v.stop();
+          
+          // Dispose com tratamento de erro específico para DOM
+          v.dispose();
         } catch (e: any) {
-          // Suppress removeChild errors common in React StrictMode
-          if (e.message && e.message.includes && e.message.includes('removeChild')) {
-             // Ignore
+          // Ignora erro específico de 'removeChild' que ocorre se o React já removeu o nó pai
+          if (e instanceof DOMException || (e.message && e.message.includes && e.message.includes('removeChild'))) {
+             // Erro esperado em race-conditions de cleanup, ignorar.
           } else {
              console.warn("Viewer dispose warning:", e);
           }
         }
       }
+      
+      // Limpeza manual final do container para evitar vazamento de memória ou canvas fantasma
+      if (mountNode) {
+          try {
+            while (mountNode.firstChild) {
+                mountNode.removeChild(mountNode.firstChild);
+            }
+          } catch (e) {
+            // Ignorar se o mountNode já estiver desanexado
+          }
+      }
+
       viewerRef.current = null;
       loadedRef.current = false;
     };
