@@ -7,16 +7,14 @@ export const APP_CONFIG = {
 
 export const DEMO_DATA_URLS = {
     // 1. GAUSSIAN SPLAT
-    // Link corrigido para evitar erro 403 do Google Drive.
-    // Usando modelo público (Plush) hospedado no GitHub que suporta CORS nativamente.
-    SPLAT: "https://media.githubusercontent.com/media/antimatter15/splat/master/plush.splat", 
+    // Usando media.githubusercontent.com para garantir suporte a arquivos LFS (Large File Storage)
+    // Isso evita erros 404 ou carregamento de "pointers" de texto em vez do binário
+    SPLAT: "https://media.githubusercontent.com/media/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat", 
     
     // 2. NUVEM DE PONTOS
-    // Arquivo de exemplo estável
     POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",
 
     // 3. IMAGENS
-    // Arquivo: DJI_20250307143535_0003_V.JPG
     DEMO_IMAGES: [
         {
             filename: "DJI_20250307143535_0003_V.JPG",

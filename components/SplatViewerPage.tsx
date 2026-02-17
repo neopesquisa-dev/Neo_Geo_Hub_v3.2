@@ -1,11 +1,11 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { GaussianSplatLayer } from '../types';
 import * as THREE from 'three';
 import { 
-  ArrowLeft, Loader2, Maximize, Rotate3d, Box, 
-  Settings2, ChevronDown, RefreshCw, AlertTriangle, Move,
-  Compass, Zap, Disc
+  ArrowLeft, Loader2, Maximize, Box, 
+  Settings2, ChevronDown, RefreshCw, AlertTriangle, 
+  Zap, Disc, Ruler, MapPin, Play, Pause, Trash2, MousePointer2, Plus, Save, X
 } from 'lucide-react';
 
 // @ts-ignore
@@ -16,12 +16,32 @@ interface SplatViewerPageProps {
   onExit: () => void;
 }
 
+interface MarkerData {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  label: string;
+}
+
+interface MeasurementData {
+  id: string;
+  start: { x: number, y: number, z: number };
+  end: { x: number, y: number, z: number };
+  distance: number;
+}
+
 const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const loadedRef = useRef(false);
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const mouseRef = useRef(new THREE.Vector2());
   
-  // State
+  // Grupos Three.js para objetos auxiliares
+  const toolsGroupRef = useRef<THREE.Group>(new THREE.Group());
+  
+  // State - System
   const [isLoading, setIsLoading] = useState(true);
   const [loadingText, setLoadingText] = useState("Iniciando Engine...");
   const [progress, setProgress] = useState(0); 
@@ -29,12 +49,23 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
   const [splatCount, setSplatCount] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(true);
 
-  // Scene Controls
+  // State - Scene Controls
   const [splatScale, setSplatScale] = useState(1.0); 
   const [renderMode, setRenderMode] = useState<number>(0); 
   const [position, setPosition] = useState({ x: 0, y: 0, z: 0 });
-  // Modificado: Rotação inicial em Y configurada para -90 conforme solicitado
   const [rotation, setRotation] = useState({ x: 0, y: -90, z: 0 }); 
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // State - Tools
+  const [activeTool, setActiveTool] = useState<'NONE' | 'RULER' | 'MARKER'>('NONE');
+  const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [measurements, setMeasurements] = useState<MeasurementData[]>([]);
+  const [tempMeasureStart, setTempMeasureStart] = useState<{ x: number, y: number, z: number } | null>(null);
+
+  // Marker Input Logic
+  const [isMarkerInputOpen, setIsMarkerInputOpen] = useState(false);
+  const [tempMarkerPos, setTempMarkerPos] = useState<{ x: number, y: number, z: number } | null>(null);
+  const [markerText, setMarkerText] = useState("");
 
   useEffect(() => {
     const currentContainer = containerRef.current;
@@ -50,8 +81,6 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
         setError(null);
         setProgress(5);
 
-        // SplatViewer handles its own Three.js setup internally.
-        // Modificado: initialCameraPosition reduzido para [0, 5, 10] para aumentar o zoom inicial
         viewer = new SplatViewer({
           'cameraUp': [0, 1, 0], 
           'initialCameraPosition': [0, 5, 10],
@@ -65,10 +94,13 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
 
         viewerRef.current = viewer;
 
+        // Configuração do Raycaster para pontos (caso o splat seja renderizado como pontos)
+        raycasterRef.current.params.Points.threshold = 0.1;
+
         const formatCode = layer.format === 'PLY' ? 2 : 0;
 
         await viewer.addSplatScene(layer.url, {
-          'splatAlphaRemovalThreshold': 1,
+          'splatAlphaRemovalThreshold': 5, // Ajuste para melhor performance/visual
           'showLoadingUI': false,
           'position': [0, 0, 0],
           'rotation': [0.7071068, -0.7071068, 0, 0], // Native Z-up to Y-up rotation
@@ -84,13 +116,14 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
 
         if (!isMounted) return;
 
-        // Adicionado: Helper de eixos XYZ para orientação espacial
+        // Adiciona Grupo de Ferramentas à Cena
         if (viewer.scene) {
-            const axesHelper = new THREE.AxesHelper(5);
+            const axesHelper = new THREE.AxesHelper(2);
             viewer.scene.add(axesHelper);
+            viewer.scene.add(toolsGroupRef.current);
         }
 
-        // Auto-center the mesh within the viewer's world coordinate system
+        // Auto-center e contagem
         const mesh = viewer.getSplatMesh();
         if (mesh) {
             mesh.geometry.computeBoundingBox();
@@ -133,14 +166,13 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
     };
   }, [layer]);
 
-  // Sync Controls with Viewer instance
+  // Sync Controls & Auto Rotate
   useEffect(() => {
     if(viewerRef.current && viewerRef.current.getSplatMesh()) {
         const mesh = viewerRef.current.getSplatMesh();
         mesh.setSplatScale(splatScale);
         mesh.position.set(position.x, position.y, position.z);
         
-        // Correcting rotation offset for Gaussian Splats
         const radX = ((rotation.x - 90) * Math.PI) / 180;
         const radY = (rotation.y * Math.PI) / 180;
         const radZ = (rotation.z * Math.PI) / 180;
@@ -149,13 +181,145 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
         if (typeof viewerRef.current.setRenderMode === 'function') {
             viewerRef.current.setRenderMode(renderMode);
         }
+
+        // Auto Rotate Control
+        if (viewerRef.current.controls) {
+            viewerRef.current.controls.autoRotate = isPlaying;
+            viewerRef.current.controls.autoRotateSpeed = 2.0;
+        }
     }
-  }, [splatScale, position, rotation, renderMode]);
+  }, [splatScale, position, rotation, renderMode, isPlaying]);
+
+  // --- HELPERS VISUAIS THREE.JS ---
+
+  const addVisualSphere = (pos: {x:number, y:number, z:number}, color: number, scale = 0.2) => {
+      const geometry = new THREE.SphereGeometry(scale, 16, 16);
+      const material = new THREE.MeshBasicMaterial({ color: color, depthTest: false, transparent: true, opacity: 0.9 });
+      const sphere = new THREE.Mesh(geometry, material);
+      sphere.position.set(pos.x, pos.y, pos.z);
+      toolsGroupRef.current.add(sphere);
+      return sphere;
+  };
+
+  const addVisualLine = (start: {x:number, y:number, z:number}, end: {x:number, y:number, z:number}, color: number) => {
+      const material = new THREE.LineBasicMaterial({ color: color, depthTest: false, linewidth: 2 });
+      const points = [
+          new THREE.Vector3(start.x, start.y, start.z),
+          new THREE.Vector3(end.x, end.y, end.z)
+      ];
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const line = new THREE.Line(geometry, material);
+      toolsGroupRef.current.add(line);
+      return line;
+  };
+
+  // --- INTERAÇÃO (RAYCAST) ---
+
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    if (activeTool === 'NONE' || !viewerRef.current || !containerRef.current || isMarkerInputOpen) return;
+
+    // Normalizar coordenadas do mouse (-1 a +1)
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+    mouseRef.current.set(x, y);
+    raycasterRef.current.setFromCamera(mouseRef.current, viewerRef.current.camera);
+
+    const mesh = viewerRef.current.getSplatMesh();
+    if (!mesh) return;
+
+    const intersects = raycasterRef.current.intersectObject(mesh);
+
+    if (intersects.length > 0) {
+        const point = intersects[0].point;
+
+        if (activeTool === 'MARKER') {
+            setTempMarkerPos({ x: point.x, y: point.y, z: point.z });
+            setIsMarkerInputOpen(true); // Abre modal de digitação
+        } 
+        else if (activeTool === 'RULER') {
+            if (!tempMeasureStart) {
+                // Primeiro Clique: Define Ponto A
+                setTempMeasureStart({ x: point.x, y: point.y, z: point.z });
+                addVisualSphere(point, 0xffff00, 0.15); // Esfera Amarela no Ponto A
+            } else {
+                // Segundo Clique: Define Ponto B e Calcula
+                const startVec = new THREE.Vector3(tempMeasureStart.x, tempMeasureStart.y, tempMeasureStart.z);
+                const endVec = point;
+                const dist = startVec.distanceTo(endVec);
+
+                // Desenha linha e esfera final
+                addVisualSphere(point, 0xffff00, 0.15); // Esfera Amarela no Ponto B
+                addVisualLine(tempMeasureStart, point, 0x00ffff); // Linha Ciano
+
+                setMeasurements(prev => [...prev, {
+                    id: `ms-${Date.now()}`,
+                    start: tempMeasureStart,
+                    end: { x: point.x, y: point.y, z: point.z },
+                    distance: dist
+                }]);
+                setTempMeasureStart(null); // Reseta para próxima medição
+            }
+        }
+    }
+  }, [activeTool, tempMeasureStart, isMarkerInputOpen]);
+
+  const saveMarker = () => {
+      if (tempMarkerPos && markerText.trim()) {
+          const newMarker: MarkerData = {
+              id: `mk-${Date.now()}`,
+              x: tempMarkerPos.x,
+              y: tempMarkerPos.y,
+              z: tempMarkerPos.z,
+              label: markerText
+          };
+          setMarkers(prev => [...prev, newMarker]);
+          addVisualSphere(tempMarkerPos, 0xff00ff, 0.3); // Esfera Magenta para o Marcador
+          
+          // Reset Input
+          setIsMarkerInputOpen(false);
+          setMarkerText("");
+          setTempMarkerPos(null);
+          setActiveTool('NONE'); // Opcional: sai do modo marcador após adicionar
+      }
+  };
+
+  const cancelMarker = () => {
+      setIsMarkerInputOpen(false);
+      setMarkerText("");
+      setTempMarkerPos(null);
+  };
+
+  const clearMeasurements = () => {
+      // Remove visualmente apenas linhas e esferas de medição (simplificação: limpa tudo do grupo e redesenha marcadores se necessário)
+      // Aqui vamos limpar tudo do grupo de ferramentas e recolocar os marcadores se existirem
+      toolsGroupRef.current.clear();
+      setMeasurements([]);
+      setTempMeasureStart(null);
+      
+      // Re-add markers visual
+      markers.forEach(m => addVisualSphere(m, 0xff00ff, 0.3));
+  };
+
+  const clearMarkers = () => {
+      // Limpa marcadores do estado e redesenha medições
+      setMarkers([]);
+      toolsGroupRef.current.clear();
+      
+      // Re-add measurements visual
+      measurements.forEach(m => {
+          addVisualSphere(m.start, 0xffff00, 0.15);
+          addVisualSphere(m.end, 0xffff00, 0.15);
+          addVisualLine(m.start, m.end, 0x00ffff);
+      });
+  };
 
   const resetView = () => {
     setSplatScale(1.0);
     setRenderMode(0);
-    setRotation({ x: 0, y: -90, z: 0 }); // Reset para a nova rotação padrão
+    setRotation({ x: 0, y: -90, z: 0 });
+    setIsPlaying(false);
     if(viewerRef.current && viewerRef.current.camera) {
         viewerRef.current.camera.position.set(0, 5, 10);
         viewerRef.current.camera.lookAt(0, 0, 0);
@@ -164,7 +328,37 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
 
   return (
     <div className="fixed inset-0 z-[2000] bg-[#020202] flex flex-col font-sans select-none overflow-hidden text-white">
-      <div ref={containerRef} className="flex-1 w-full h-full relative cursor-move active:cursor-grabbing" />
+      <div 
+        ref={containerRef} 
+        className={`flex-1 w-full h-full relative ${activeTool !== 'NONE' ? 'cursor-crosshair' : 'cursor-move active:cursor-grabbing'}`}
+        onClick={handleCanvasClick}
+      />
+
+      {/* INPUT MODAL FOR MARKERS */}
+      {isMarkerInputOpen && (
+          <div className="absolute inset-0 z-[2100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
+              <div className="bg-[#111] border border-[#333] p-4 rounded-xl shadow-2xl w-80 animate-in zoom-in-95">
+                  <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                      <MapPin size={14} className="text-fuchsia-500"/> Adicionar Anotação
+                  </h3>
+                  <input 
+                      autoFocus
+                      type="text" 
+                      placeholder="Digite sua observação..."
+                      className="w-full bg-black border border-[#333] rounded px-3 py-2 text-xs text-white mb-3 focus:border-fuchsia-500 outline-none"
+                      value={markerText}
+                      onChange={(e) => setMarkerText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && saveMarker()}
+                  />
+                  <div className="flex justify-end gap-2">
+                      <button onClick={cancelMarker} className="px-3 py-1.5 rounded text-xs text-gray-400 hover:text-white hover:bg-white/10">Cancelar</button>
+                      <button onClick={saveMarker} className="px-3 py-1.5 rounded text-xs font-bold bg-fuchsia-600 hover:bg-fuchsia-500 text-white flex items-center gap-1">
+                          <Save size={12}/> Salvar
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
 
       {/* Top Navigation UI */}
       <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start pointer-events-none">
@@ -179,10 +373,19 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
                 </h1>
                 <div className="flex items-center gap-3 text-[10px] text-yellow-500/60 font-mono">
                     <span className="flex items-center gap-1"><Box size={10}/> {splatCount.toLocaleString()} GAUSSIANS</span>
-                    <span className="w-1 h-1 bg-white/20 rounded-full"></span>
-                    <span className="flex items-center gap-1"><Zap size={10}/> GPU ACCELERATED</span>
                 </div>
             </div>
+        </div>
+
+        {/* Play/Pause Control */}
+        <div className="pointer-events-auto">
+            <button 
+                onClick={() => setIsPlaying(!isPlaying)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md transition-all font-bold text-xs uppercase ${isPlaying ? 'bg-yellow-500 border-yellow-400 text-black' : 'bg-black/40 border-white/10 text-white hover:bg-white/10'}`}
+            >
+                {isPlaying ? <Pause size={14} fill={isPlaying ? "black" : "currentColor"} /> : <Play size={14} fill="currentColor" />}
+                {isPlaying ? 'PAUSE ROTATION' : 'PLAY ROTATION'}
+            </button>
         </div>
       </div>
 
@@ -197,6 +400,83 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
                       <RefreshCw size={10}/> Reset
                   </button>
               </div>
+
+              {/* Tools Section */}
+              <div className="space-y-3">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                      <MousePointer2 size={12} className="text-cyan-500"/> Ferramentas Interativas
+                  </span>
+                  <div className="flex gap-2">
+                      <button 
+                        onClick={() => { setActiveTool(activeTool === 'RULER' ? 'NONE' : 'RULER'); setTempMeasureStart(null); }}
+                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 rounded border transition-all ${activeTool === 'RULER' ? 'bg-cyan-900/40 border-cyan-500 text-cyan-400' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}`}
+                      >
+                          <Ruler size={16} />
+                          <span className="text-[9px] font-bold uppercase">Régua</span>
+                      </button>
+                      <button 
+                        onClick={() => { setActiveTool(activeTool === 'MARKER' ? 'NONE' : 'MARKER'); setIsMarkerInputOpen(false); }}
+                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 rounded border transition-all ${activeTool === 'MARKER' ? 'bg-fuchsia-900/40 border-fuchsia-500 text-fuchsia-400' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}`}
+                      >
+                          <MapPin size={16} />
+                          <span className="text-[9px] font-bold uppercase">Marcador</span>
+                      </button>
+                  </div>
+
+                  {/* Tool Hints & Data */}
+                  {activeTool === 'RULER' && (
+                      <div className="bg-cyan-900/10 border border-cyan-500/30 p-3 rounded text-[10px] animate-in slide-in-from-top-2">
+                          <div className="text-cyan-300 mb-2 font-bold flex justify-between items-center">
+                              <span>MEDIÇÕES: {measurements.length}</span>
+                              {measurements.length > 0 && <button onClick={clearMeasurements} className="text-cyan-500 hover:text-white"><Trash2 size={10}/></button>}
+                          </div>
+                          
+                          {tempMeasureStart && (
+                              <div className="flex items-center gap-2 text-yellow-500 animate-pulse mb-2 bg-yellow-900/20 p-1.5 rounded border border-yellow-500/20">
+                                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                  <span>Clique no ponto final...</span>
+                              </div>
+                          )}
+                          
+                          <div className="space-y-1 max-h-20 overflow-y-auto custom-scrollbar">
+                              {measurements.map((m, i) => (
+                                  <div key={m.id} className="flex justify-between text-gray-400 font-mono border-b border-white/5 pb-1">
+                                      <span>Dist {i+1}:</span>
+                                      <span className="text-white font-bold">{m.distance.toFixed(3)}m</span>
+                                  </div>
+                              ))}
+                              {measurements.length === 0 && !tempMeasureStart && <span className="text-gray-500 italic">Clique em dois pontos para medir.</span>}
+                          </div>
+                      </div>
+                  )}
+
+                  {/* Marker List Panel */}
+                  <div className={`bg-fuchsia-900/10 border border-fuchsia-500/30 p-3 rounded text-[10px] transition-all ${activeTool === 'MARKER' || markers.length > 0 ? 'block' : 'hidden'}`}>
+                      <div className="text-fuchsia-300 mb-2 font-bold flex justify-between items-center">
+                          <span>ANOTAÇÕES: {markers.length}</span>
+                          {markers.length > 0 && <button onClick={clearMarkers} className="text-fuchsia-500 hover:text-white"><Trash2 size={10}/></button>}
+                      </div>
+                      
+                      {activeTool === 'MARKER' && (
+                           <div className="flex items-center gap-2 text-fuchsia-400 mb-2 bg-fuchsia-900/20 p-1.5 rounded border border-fuchsia-500/20">
+                                <Plus size={10} />
+                                <span>Clique no modelo para adicionar...</span>
+                           </div>
+                      )}
+
+                      <div className="space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                          {markers.map((m, i) => (
+                              <div key={m.id} className="flex flex-col text-gray-400 font-mono border-b border-white/5 pb-1.5 mb-1.5">
+                                  <span className="text-white font-bold truncate">"{m.label}"</span>
+                                  <span className="text-[8px] text-gray-600">XYZ: {m.x.toFixed(1)}, {m.y.toFixed(1)}, {m.z.toFixed(1)}</span>
+                              </div>
+                          ))}
+                           {markers.length === 0 && activeTool !== 'MARKER' && <span className="text-gray-600 italic">Nenhuma anotação.</span>}
+                      </div>
+                  </div>
+              </div>
+
+              <div className="w-full h-px bg-white/10 my-2"></div>
 
               {/* Toggle Visualization Mode */}
               <div className="space-y-3">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Viewer3D from './components/Viewer3D';
@@ -99,16 +100,23 @@ const App: React.FC = () => {
             
             for (const layer of storedLayers) {
                 if (layer.type === 'GAUSSIAN_SPLAT' || layer.type === 'POINT_CLOUD') {
-                    const storedFile = await db.files.get(layer.id);
-                    if (storedFile) {
-                        const url = URL.createObjectURL(storedFile.data);
-                        if (layer.type === 'GAUSSIAN_SPLAT') {
-                            rehydratedLayers.push({ ...layer, url } as GaussianSplatLayer);
+                    // Se a URL já for um Blob URL válido (começa com blob:), mantemos.
+                    // Se for remota (http), mantemos.
+                    if (layer.url && (layer.url.startsWith('http') || layer.url.startsWith('blob:'))) {
+                        rehydratedLayers.push(layer);
+                    } else {
+                        const storedFile = await db.files.get(layer.id);
+                        if (storedFile) {
+                            const url = URL.createObjectURL(storedFile.data);
+                            if (layer.type === 'GAUSSIAN_SPLAT') {
+                                rehydratedLayers.push({ ...layer, url } as GaussianSplatLayer);
+                            } else {
+                                rehydratedLayers.push(layer);
+                            }
                         } else {
+                            // Se não tem arquivo físico e nem URL válida, removemos ou mantemos como placeholder
                             rehydratedLayers.push(layer);
                         }
-                    } else {
-                        rehydratedLayers.push(layer);
                     }
                 } 
                 else if (layer.type === 'PHOTO_SET') {
@@ -241,57 +249,108 @@ const App: React.FC = () => {
         }
 
         // 1. Carregar Splat Demo
+        let splatBlob: Blob | null = null;
         try {
             console.log("Buscando Splat:", DEMO_DATA_URLS.SPLAT);
+            // Tenta carregar da URL Remota (Github Media)
             const splatResponse = await fetch(DEMO_DATA_URLS.SPLAT);
-            if (!splatResponse.ok) throw new Error(`Fetch error: ${splatResponse.status}`);
-            const splatBlob = await splatResponse.blob();
+            
+            if (!splatResponse.ok) throw new Error(`Remote Fetch Status: ${splatResponse.status}`);
+            
+            const tempBlob = await splatResponse.blob();
+            // Verificar se o que baixou é realmente um arquivo binário e não uma página HTML de erro 404/github
+            if (tempBlob.type.includes("text/html") || tempBlob.size < 1000) {
+                throw new Error("Invalid content type or size (likely HTML error page)");
+            }
+            splatBlob = tempBlob;
+        } catch (remoteErr) {
+             console.warn(`Falha no carregamento remoto (${remoteErr}), tentando local...`);
+             try {
+                const localResponse = await fetch("/Demo/SUBESTACAO_RGB_2_splat.splat");
+                if (!localResponse.ok) throw new Error("Local Fetch Failed");
+                splatBlob = await localResponse.blob();
+             } catch (localErr) {
+                console.error("Falha também no carregamento local.");
+             }
+        }
+
+        if (splatBlob) {
+            const objectUrl = URL.createObjectURL(splatBlob);
             
             const splatLayer: GaussianSplatLayer = {
                 id: `layer-demo-splat-${Date.now()}`,
                 workspaceId: wsId,
-                name: "Modelo 3DGS (PLAT_5)",
+                name: "Subestação Goiabeiras",
                 type: 'GAUSSIAN_SPLAT',
                 visible: true,
                 opacity: 1,
                 date: new Date().toISOString(),
-                url: URL.createObjectURL(splatBlob),
+                url: objectUrl, // Usa o Blob URL criado imediatamente
                 format: 'SPLAT',
                 splatCount: Math.floor(splatBlob.size / 32),
                 fileSize: splatBlob.size
             };
-            await saveLayerToDB(splatLayer, splatBlob);
-            console.log("Splat carregado com sucesso.");
-        } catch (e) { 
-            console.error("Splat demo load fail", e); 
+
+            // Tenta salvar no DB Local.
+            try {
+                await saveLayerToDB(splatLayer, splatBlob);
+                console.log("Splat carregado e salvo localmente.");
+            } catch (dbErr) {
+                console.warn("Falha ao salvar Splat no IndexedDB (provavelmente tamanho). Usando versão em memória para esta sessão.", dbErr);
+                // IMPORTANTE: Não revogamos a URL aqui. Deixamos o layer com a URL do blob em memória.
+                // Salvamos apenas o metadado no DB para que o App saiba que o layer existe.
+                await db.layers.put(splatLayer);
+            }
+        } else {
+            console.warn("Splat Demo falhou em carregar de todas as fontes.");
         }
 
         // 2. Carregar Nuvem de Pontos Demo
-        try {
-            // @ts-ignore - Point Cloud URL
-            const cloudUrl = DEMO_DATA_URLS.POINT_CLOUD;
-            if (cloudUrl) {
+        // @ts-ignore
+        const cloudUrl = DEMO_DATA_URLS.POINT_CLOUD;
+        let pcBlob: Blob | null = null;
+        if (cloudUrl) {
+            try {
                 console.log("Buscando Point Cloud:", cloudUrl);
                 const pcResponse = await fetch(cloudUrl);
-                if (!pcResponse.ok) throw new Error(`Fetch error: ${pcResponse.status}`);
-                const pcBlob = await pcResponse.blob();
-                
-                const pcLayer: PointCloudLayer = {
-                    id: `layer-demo-pc-${Date.now()}`,
-                    workspaceId: wsId,
-                    name: "Nuvem de Pontos (Sub_Fx)",
-                    type: 'POINT_CLOUD',
-                    visible: true,
-                    opacity: 1,
-                    date: new Date().toISOString(),
-                    pointCount: 0, // Será calculado ao abrir
-                    format: 'PLY'
-                };
-                await saveLayerToDB(pcLayer, pcBlob);
-                console.log("Point Cloud carregada com sucesso.");
+                if (!pcResponse.ok) throw new Error(`Remote Fetch Status: ${pcResponse.status}`);
+                pcBlob = await pcResponse.blob();
+            } catch (remoteErr) {
+                 console.warn("Falha no carregamento remoto PointCloud, tentando local...");
+                 try {
+                     // Tenta carregar localmente se existir na pasta public
+                     const localResponse = await fetch("/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply");
+                     if (localResponse.ok) {
+                         pcBlob = await localResponse.blob();
+                     }
+                 } catch (localErr) {
+                     console.error("Falha no fallback local PointCloud");
+                 }
             }
-        } catch (e) { 
-            console.error("Point Cloud demo load fail", e); 
+        }
+
+        if (pcBlob) {
+            const pcLayer: PointCloudLayer = {
+                id: `layer-demo-pc-${Date.now()}`,
+                workspaceId: wsId,
+                name: "Nuvem de Pontos (Sub_Fx)",
+                type: 'POINT_CLOUD',
+                visible: true,
+                opacity: 1,
+                date: new Date().toISOString(),
+                pointCount: 0, // Será calculado ao abrir
+                format: 'PLY'
+            };
+            try {
+                await saveLayerToDB(pcLayer, pcBlob);
+            } catch (dbErr) {
+                console.warn("Falha ao salvar PC no DB, usando remoto.");
+                // Se falhou ao salvar, tentamos usar a URL remota como fallback, mas já temos o blob aqui...
+                // O ideal seria criar URL do blob se salvamento falhou
+                pcLayer.url = URL.createObjectURL(pcBlob);
+                await db.layers.put(pcLayer);
+            }
+            console.log("Point Cloud carregada com sucesso.");
         }
 
         // 3. Carregar Fotos Demo
@@ -302,27 +361,20 @@ const App: React.FC = () => {
                 const res = await fetch(imgData.url);
                 if (!res.ok) {
                     console.warn(`Imagem fetch error: ${res.status}`);
+                    // Fallback local se falhar remoto
+                    const localUrl = `/Demo/${imgData.filename}`;
+                    try {
+                        const localRes = await fetch(localUrl);
+                        if(localRes.ok) {
+                             const blob = await localRes.blob();
+                             await processImageBlob(blob, imgData, idx, wsId, demoImages);
+                        }
+                    } catch(e) { /* ignore */ }
                     continue;
                 }
                 const blob = await res.blob();
+                await processImageBlob(blob, imgData, idx, wsId, demoImages);
                 
-                // Tenta extrair EXIF real, usa fallback do constants se falhar
-                const exifData = await getExifDataFromBlob(blob);
-                const realLat = exifData.lat ?? imgData.lat;
-                const realLng = exifData.lng ?? imgData.lng;
-                
-                const imgId = `img-demo-${idx}-${Date.now()}`;
-                await db.files.put({ id: imgId, data: blob, type: blob.type });
-
-                demoImages.push({
-                    id: imgId,
-                    filename: imgData.filename,
-                    url: URL.createObjectURL(blob), 
-                    lat: realLat,
-                    lng: realLng,
-                    timestamp: Date.now(),
-                    analysis: undefined // Forçar undefined para que o botão de análise apareça
-                });
             } catch (e) {
                 console.warn(`Failed to load demo image: ${imgData.filename}`, e);
             }
@@ -346,10 +398,30 @@ const App: React.FC = () => {
         setState(prev => ({ ...prev, viewMode: ViewMode.MODE_3D }));
     } catch (e) {
         console.error("Demo Load Critical Failure", e);
-        alert("Erro crítico ao carregar demo. Verifique o console para detalhes de rede.");
+        alert("Erro crítico ao carregar demo. Verifique o console para detalhes.");
     } finally {
         setDbLoading(false);
     }
+  };
+
+  const processImageBlob = async (blob: Blob, imgData: any, idx: number, wsId: string, demoImages: GeoImage[]) => {
+        // Tenta extrair EXIF real, usa fallback do constants se falhar
+        const exifData = await getExifDataFromBlob(blob);
+        const realLat = exifData.lat ?? imgData.lat;
+        const realLng = exifData.lng ?? imgData.lng;
+        
+        const imgId = `img-demo-${idx}-${Date.now()}`;
+        await db.files.put({ id: imgId, data: blob, type: blob.type });
+
+        demoImages.push({
+            id: imgId,
+            filename: imgData.filename,
+            url: URL.createObjectURL(blob), 
+            lat: realLat,
+            lng: realLng,
+            timestamp: Date.now(),
+            analysis: undefined // Forçar undefined para que o botão de análise apareça
+        });
   };
 
   // Melhoria na robustez da extração do EXIF
