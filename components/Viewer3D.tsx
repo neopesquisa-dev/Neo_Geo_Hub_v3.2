@@ -45,7 +45,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
   // Scene setup
   useEffect(() => {
     if (!mountRef.current) return;
-    const mountNode = mountRef.current;
+    const mountNode = mountRef.current; // CAPTURE MOUNT NODE for cleanup closure
     
     const scene = new THREE.Scene();
     // FORÇADO: Fundo sempre escuro para melhor contraste dos pontos, mesmo em modo claro
@@ -192,12 +192,13 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
       
       if (rendererRef.current) {
           const dom = rendererRef.current.domElement;
-          try {
-              if (dom && dom.parentElement) {
-                  dom.parentElement.removeChild(dom);
+          // STRICT CLEANUP: Check against captured mountNode
+          if (mountNode && dom && dom.parentNode === mountNode) {
+              try {
+                  mountNode.removeChild(dom);
+              } catch (e) {
+                  console.warn("Error removing renderer DOM:", e);
               }
-          } catch (e) {
-              console.warn("Error cleaning up 3D Viewer DOM:", e);
           }
           rendererRef.current.dispose();
       }

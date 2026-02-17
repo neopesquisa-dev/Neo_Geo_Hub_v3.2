@@ -83,31 +83,31 @@
           transition: color 0.3s ease, text-shadow 0.3s ease;
       }
       
-      /* HOVER: CORES NEON (Mesmas do Dark Mode) com Sombra para Leitura */
+      /* HOVER: CORES NEON (Mesmas do Dark Mode) com Sombra Forte para Leitura no Fundo Claro */
       
       /* "Neo" -> Cyan */
       body.light-mode header .group:hover h1 span.group-hover\:text-cyan-400 { 
-          color: #22d3ee !important; 
-          text-shadow: 0 1px 2px rgba(0,0,0,0.6); /* Sombra para destacar o Cyan no fundo cinza */
+          color: #00FFFF !important; 
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* Sombra escura para contraste */
       }
       /* "Geo" -> Fuchsia */
       body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-500 { 
           color: #FF00FF !important; 
-          text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
       }
       /* "Hub" -> Yellow */
       body.light-mode header .group:hover h1 span.group-hover\:text-yellow-500 { 
           color: #CFFF04 !important; 
-          text-shadow: 0 1px 2px rgba(0,0,0,0.7); /* Sombra mais forte para o Amarelo Neon */
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
       }
       
-      /* ".v3" Suffix - Sempre Fuchsia, mas mais escuro quando inativo no light mode */
+      /* ".v3" Suffix */
       body.light-mode header h1 span.text-fuchsia-500 { 
           color: #a21caf !important; /* Fuchsia 700 - Base state visível */
       }
       body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-400 {
            color: #FF00FF !important; /* Neon no hover */
-           text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+           text-shadow: 0 1px 3px rgba(0,0,0,0.8);
       }
 
       /* Subtítulo - Preto/Cinza Escuro no Light Mode */

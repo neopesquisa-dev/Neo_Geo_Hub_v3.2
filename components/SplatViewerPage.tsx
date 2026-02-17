@@ -156,9 +156,15 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
       clearTimeout(timer);
       if (viewer) {
         try {
+          // Attempt to dispose. Catch specific DOM errors.
           viewer.dispose();
-        } catch (e) {
-          console.warn("Viewer dispose failed", e);
+        } catch (e: any) {
+          // Suppress removeChild errors common in React StrictMode
+          if (e.message && e.message.includes && e.message.includes('removeChild')) {
+             // Ignore
+          } else {
+             console.warn("Viewer dispose warning:", e);
+          }
         }
       }
       viewerRef.current = null;

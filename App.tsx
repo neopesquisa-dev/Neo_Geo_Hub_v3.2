@@ -264,14 +264,7 @@ const App: React.FC = () => {
             }
             splatBlob = tempBlob;
         } catch (remoteErr) {
-             console.warn(`Falha no carregamento remoto (${remoteErr}), tentando local...`);
-             try {
-                const localResponse = await fetch("/Demo/SUBESTACAO_RGB_2_splat.splat");
-                if (!localResponse.ok) throw new Error("Local Fetch Failed");
-                splatBlob = await localResponse.blob();
-             } catch (localErr) {
-                console.error("Falha também no carregamento local.");
-             }
+             console.warn(`Falha no carregamento remoto (${remoteErr})`);
         }
 
         if (splatBlob) {
@@ -316,16 +309,7 @@ const App: React.FC = () => {
                 if (!pcResponse.ok) throw new Error(`Remote Fetch Status: ${pcResponse.status}`);
                 pcBlob = await pcResponse.blob();
             } catch (remoteErr) {
-                 console.warn("Falha no carregamento remoto PointCloud, tentando local...");
-                 try {
-                     // Tenta carregar localmente se existir na pasta public
-                     const localResponse = await fetch("/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply");
-                     if (localResponse.ok) {
-                         pcBlob = await localResponse.blob();
-                     }
-                 } catch (localErr) {
-                     console.error("Falha no fallback local PointCloud");
-                 }
+                 console.warn("Falha no carregamento remoto PointCloud");
             }
         }
 
@@ -361,15 +345,6 @@ const App: React.FC = () => {
                 const res = await fetch(imgData.url);
                 if (!res.ok) {
                     console.warn(`Imagem fetch error: ${res.status}`);
-                    // Fallback local se falhar remoto
-                    const localUrl = `/Demo/${imgData.filename}`;
-                    try {
-                        const localRes = await fetch(localUrl);
-                        if(localRes.ok) {
-                             const blob = await localRes.blob();
-                             await processImageBlob(blob, imgData, idx, wsId, demoImages);
-                        }
-                    } catch(e) { /* ignore */ }
                     continue;
                 }
                 const blob = await res.blob();
@@ -398,7 +373,7 @@ const App: React.FC = () => {
         setState(prev => ({ ...prev, viewMode: ViewMode.MODE_3D }));
     } catch (e) {
         console.error("Demo Load Critical Failure", e);
-        alert("Erro crítico ao carregar demo. Verifique o console para detalhes.");
+        // Alert removed to improve UX on network failure
     } finally {
         setDbLoading(false);
     }
