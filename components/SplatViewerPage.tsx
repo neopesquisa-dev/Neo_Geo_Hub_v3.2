@@ -360,37 +360,38 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
           </div>
       )}
 
-      {/* Top Navigation UI */}
-      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start pointer-events-none">
-        <div className="pointer-events-auto flex items-center gap-4">
-            <button onClick={onExit} className="w-10 h-10 bg-black/40 hover:bg-yellow-500 hover:text-black backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white transition-all shadow-xl">
-                <ArrowLeft size={18} />
+      {/* Top Navigation UI - Mobile Optimized */}
+      <div className="absolute top-0 left-0 w-full p-3 md:p-6 flex justify-between items-start pointer-events-none">
+        <div className="pointer-events-auto flex items-center gap-2 md:gap-4 max-w-[60%]">
+            <button onClick={onExit} className="w-8 h-8 md:w-10 md:h-10 bg-black/40 hover:bg-yellow-500 hover:text-black backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white transition-all shadow-xl shrink-0">
+                <ArrowLeft size={16} />
             </button>
-            <div className="flex flex-col">
-                <h1 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                    {layer.name}
-                    <span className="bg-yellow-500 text-black text-[9px] px-1.5 py-0.5 rounded font-mono font-bold">3DGS ENGINE</span>
+            <div className="flex flex-col min-w-0">
+                <h1 className="text-sm md:text-lg font-bold text-white tracking-tight flex items-center gap-2 truncate">
+                    <span className="truncate">{layer.name}</span>
+                    <span className="bg-yellow-500 text-black text-[9px] px-1.5 py-0.5 rounded font-mono font-bold hidden sm:inline-block">3DGS</span>
                 </h1>
-                <div className="flex items-center gap-3 text-[10px] text-yellow-500/60 font-mono">
-                    <span className="flex items-center gap-1"><Box size={10}/> {splatCount.toLocaleString()} GAUSSIANS</span>
+                <div className="flex items-center gap-3 text-[9px] md:text-[10px] text-yellow-500/60 font-mono">
+                    <span className="flex items-center gap-1"><Box size={10}/> {splatCount.toLocaleString()} <span className="hidden sm:inline">GAUSSIANS</span></span>
                 </div>
             </div>
         </div>
 
-        {/* Play/Pause Control */}
+        {/* Play/Pause Control - Compact Mobile */}
         <div className="pointer-events-auto">
             <button 
                 onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md transition-all font-bold text-xs uppercase ${isPlaying ? 'bg-yellow-500 border-yellow-400 text-black' : 'bg-black/40 border-white/10 text-white hover:bg-white/10'}`}
+                className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full border backdrop-blur-md transition-all font-bold text-[10px] md:text-xs uppercase ${isPlaying ? 'bg-yellow-500 border-yellow-400 text-black' : 'bg-black/40 border-white/10 text-white hover:bg-white/10'}`}
             >
-                {isPlaying ? <Pause size={14} fill={isPlaying ? "black" : "currentColor"} /> : <Play size={14} fill="currentColor" />}
-                {isPlaying ? 'PAUSE ROTATION' : 'PLAY ROTATION'}
+                {isPlaying ? <Pause size={12} fill={isPlaying ? "black" : "currentColor"} /> : <Play size={12} fill="currentColor" />}
+                <span className="hidden sm:inline">{isPlaying ? 'PAUSE ROTATION' : 'PLAY ROTATION'}</span>
+                <span className="sm:hidden">{isPlaying ? 'PAUSE' : 'PLAY'}</span>
             </button>
         </div>
       </div>
 
       {/* Control Sidebar Panel - Responsive Width */}
-      <div className={`absolute top-24 right-6 w-full max-w-[280px] md:w-80 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 transition-all duration-300 pointer-events-auto max-h-[75vh] overflow-y-auto custom-scrollbar ${isSettingsOpen ? 'opacity-100' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
+      <div className={`absolute top-20 right-4 md:top-24 md:right-6 w-64 md:w-80 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-5 transition-all duration-300 max-h-[70vh] overflow-y-auto custom-scrollbar ${isSettingsOpen ? 'opacity-100 pointer-events-auto visible' : 'opacity-0 translate-x-10 pointer-events-none invisible'}`}>
           <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <span className="text-[11px] font-bold text-white uppercase tracking-widest flex items-center gap-2">

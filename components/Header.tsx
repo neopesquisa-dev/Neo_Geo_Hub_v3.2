@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Box, Map, Image as ImageIcon, Menu, Database, ClipboardList, Settings, User, Server } from 'lucide-react';
 import { ViewMode, AppSettings, UserProfile, Workspace } from '../types';
@@ -24,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="h-14 md:h-16 bg-[#050505] border-b border-[#222] flex items-center justify-between px-3 md:px-4 z-50 select-none relative transition-colors shrink-0">
-      <div className="flex items-center gap-3 md:gap-6 flex-1 min-w-0">
+      <div className="flex items-center gap-2 md:gap-6 flex-1 min-w-0">
         <button 
             className="md:hidden text-gray-500 hover:text-white p-1.5 -ml-1.5 rounded-lg active:bg-white/10 transition-colors shrink-0"
             onClick={toggleSidebar}
@@ -33,26 +34,27 @@ const Header: React.FC<HeaderProps> = ({
         </button>
 
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          <div className="h-6 md:h-10 w-auto flex items-center">
+          <div className="h-6 md:h-10 w-auto flex items-center flex-shrink-0">
               <img 
                   src={APP_CONFIG.LOGO_SOURCE}
                   alt={APP_CONFIG.APP_TITLE} 
-                  className="h-6 md:h-10 w-auto object-contain"
+                  className="h-full w-auto object-contain"
               />
           </div>
           
           <div 
-              className="flex flex-col justify-center cursor-pointer group"
+              className="flex flex-col justify-center cursor-pointer group min-w-0"
               onClick={() => setMode(ViewMode.MODE_3D)}
               title="Voltar para Workspace"
           >
-            <h1 className="text-base md:text-xl font-bold text-white tracking-tighter leading-none font-code uppercase transition-colors whitespace-nowrap">
+            {/* Title FULL on Mobile and Desktop */}
+            <h1 className="text-sm md:text-xl font-bold text-white tracking-tighter leading-none font-code uppercase transition-colors whitespace-nowrap">
               <span className="group-hover:text-cyan-400 transition-colors duration-300">Neo</span>{' '}
               <span className="group-hover:text-fuchsia-500 transition-colors duration-300">Geo</span>{' '}
-              <span className="hidden sm:inline group-hover:text-yellow-500 transition-colors duration-300">Hub</span>{' '}
+              <span className="group-hover:text-yellow-500 transition-colors duration-300">Hub</span>{' '}
               <span className="text-fuchsia-500 group-hover:text-fuchsia-400 transition-colors duration-300">.v³</span>
             </h1>
-            <span className="hidden md:block text-[10px] text-cyan-600 font-code font-medium tracking-[0.2em] uppercase leading-tight group-hover:text-white transition-colors duration-300">
+            <span className="text-[9px] md:text-[10px] text-cyan-600 font-code font-medium tracking-[0.2em] uppercase leading-tight group-hover:text-white transition-colors duration-300 block">
               &lt;{APP_CONFIG.APP_SUBTITLE} /&gt;
             </span>
           </div>
@@ -85,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2 md:gap-4 font-code shrink-0">
         <button 
             onClick={onSwitchWorkspace}
-            className={`flex items-center gap-2 px-2 md:px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-tight transition-all max-w-[100px] md:max-w-none
+            className={`flex items-center gap-2 px-2 md:px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-tight transition-all max-w-[90px] xs:max-w-[120px] md:max-w-none
             ${activeWorkspace.id === 'demo-session' 
                 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/20 hover:border-yellow-500' 
                 : 'bg-[#1a1a1a] border-[#333] text-gray-400 hover:border-gray-400 hover:text-white'}

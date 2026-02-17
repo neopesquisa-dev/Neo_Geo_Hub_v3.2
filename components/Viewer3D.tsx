@@ -42,24 +42,14 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
     rotX: 0, rotY: 0, rotZ: 0
   });
 
-  // Update Scene Background based on Theme
-  useEffect(() => {
-    if (sceneRef.current) {
-        // Dark Mode: #020202 (Black-ish)
-        // Light Mode: #9ca3af (Slate 400) - Escurecido para corresponder ao novo tema
-        const bgColor = theme === 'light' ? 0x9ca3af : 0x020202;
-        sceneRef.current.background = new THREE.Color(bgColor);
-    }
-  }, [theme]);
-
+  // Scene setup
   useEffect(() => {
     if (!mountRef.current) return;
     const mountNode = mountRef.current;
     
     const scene = new THREE.Scene();
-    // Default background setup
-    const bgColor = theme === 'light' ? 0x9ca3af : 0x020202;
-    scene.background = new THREE.Color(bgColor);
+    // FORÇADO: Fundo sempre escuro para melhor contraste dos pontos, mesmo em modo claro
+    scene.background = new THREE.Color(0x020202);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(60, mountNode.clientWidth / mountNode.clientHeight, 0.1, 1000000);
@@ -75,10 +65,8 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // Grid e Eixos - Adjust colors based on theme if needed, but defaults usually fine
-    const gridColor = theme === 'light' ? 0x888888 : 0x111111;
-    const gridCenterColor = theme === 'light' ? 0x444444 : 0x080808;
-    const grid = new THREE.GridHelper(1000, 50, gridCenterColor, gridColor);
+    // Grid e Eixos - Cores escuras padrão para combinar com o fundo preto
+    const grid = new THREE.GridHelper(1000, 50, 0x080808, 0x111111);
     scene.add(grid);
     
     const axes = new THREE.AxesHelper(15);
@@ -264,8 +252,9 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
     colorAttr.needsUpdate = true;
   }, [pointSize, colorMode, transform]);
 
+  // Sempre renderiza com fundo escuro
   return (
-    <div className={`w-full h-full relative font-mono overflow-hidden ${theme === 'light' ? 'bg-[#9ca3af]' : 'bg-[#020202]'}`}>
+    <div className="w-full h-full relative font-mono overflow-hidden bg-[#020202]">
       <div ref={mountRef} className="w-full h-full" />
       
       {isLoading && (
@@ -284,8 +273,12 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
       </button>
 
       {/* Control Panel - Adjusted Classes for Theme Compatibility */}
-      <div className={`absolute top-16 md:top-4 right-4 flex flex-col gap-3 z-10 w-64 pointer-events-none transition-all ${showControls ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none md:opacity-100 md:translate-x-0 md:pointer-events-auto'}`}>
-          <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-4 pointer-events-auto">
+      <div className={`absolute top-16 md:top-4 right-4 flex flex-col gap-3 z-10 w-64 transition-all ${
+        showControls 
+        ? 'opacity-100 translate-x-0 pointer-events-auto' 
+        : 'opacity-0 translate-x-10 pointer-events-none invisible md:opacity-100 md:translate-x-0 md:pointer-events-auto md:visible'
+      }`}>
+          <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-4">
                 <div className="flex flex-col gap-3">
                     <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
                        <Palette size={10} className="text-yellow-500"/> Rendering Mode
@@ -302,7 +295,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
                 </div>
           </div>
 
-          <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-4 pointer-events-auto">
+          <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
                         <Move size={10} className="text-yellow-500"/> Alinhamento manual

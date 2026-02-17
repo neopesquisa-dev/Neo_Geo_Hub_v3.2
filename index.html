@@ -24,6 +24,9 @@
               cyan: {
                 500: '#00FFFF',
               }
+            },
+            screens: {
+              'xs': '380px',
             }
           }
         }
@@ -47,20 +50,82 @@
         transition: background-color 0.3s ease, color 0.3s ease;
       }
 
-      /* LIGHT MODE ENGINE (UPDATED - DARKER GREY) */
+      /* LIGHT MODE ENGINE - BALANCED DESIGN */
       body.light-mode {
-        background-color: #9ca3af !important; /* Slate 400 - Cinza Médio Técnico */
-        color: #000000 !important; /* Contraste máximo */
+        background-color: #f3f4f6 !important; /* Gray 100 - Clean Light Background */
+        color: #1f2937 !important; /* Gray 800 - High Contrast Text */
       }
       
-      /* Cabeçalho Específico - Cinza Claro (Atualizado) */
+      /* CABEÇALHO NO MODO CLARO */
       body.light-mode header {
-         background-color: #e5e7eb !important; /* Slate 200 - Cinza Claro */
-         border-color: #9ca3af !important; /* Slate 400 */
-         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+         background-color: #94a3b8 !important; /* Slate 400 - Cinza médio para suportar texto preto e hover neon */
+         border-color: #64748b !important; /* Slate 500 */
+         color: #0f172a !important; /* Slate 900 */
+         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+      }
+
+      /* LOGO BACKGROUND FIX - MODO CLARO (FADE) */
+      body.light-mode .logo-wrapper {
+          background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 60%, transparent 100%) !important;
+          border-radius: 100%;
+          padding: 5px 15px;
+          border: none;
+          box-shadow: none;
       }
       
-      /* Sidebar e Painéis - Cinza Claro (não branco) */
+      /* ESTILOS DO TÍTULO NO MODO CLARO */
+      
+      /* Estado Padrão: PRETO (Conforme solicitado) */
+      body.light-mode header h1, 
+      body.light-mode header h1 span {
+          color: #000000 !important; /* Texto Preto Original */
+          text-shadow: none;
+          transition: color 0.3s ease, text-shadow 0.3s ease;
+      }
+      
+      /* HOVER: CORES NEON (Mesmas do Dark Mode) com Sombra para Leitura */
+      
+      /* "Neo" -> Cyan */
+      body.light-mode header .group:hover h1 span.group-hover\:text-cyan-400 { 
+          color: #22d3ee !important; 
+          text-shadow: 0 1px 2px rgba(0,0,0,0.6); /* Sombra para destacar o Cyan no fundo cinza */
+      }
+      /* "Geo" -> Fuchsia */
+      body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-500 { 
+          color: #FF00FF !important; 
+          text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      }
+      /* "Hub" -> Yellow */
+      body.light-mode header .group:hover h1 span.group-hover\:text-yellow-500 { 
+          color: #CFFF04 !important; 
+          text-shadow: 0 1px 2px rgba(0,0,0,0.7); /* Sombra mais forte para o Amarelo Neon */
+      }
+      
+      /* ".v3" Suffix - Sempre Fuchsia, mas mais escuro quando inativo no light mode */
+      body.light-mode header h1 span.text-fuchsia-500 { 
+          color: #a21caf !important; /* Fuchsia 700 - Base state visível */
+      }
+      body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-400 {
+           color: #FF00FF !important; /* Neon no hover */
+           text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      }
+
+      /* Subtítulo - Preto/Cinza Escuro no Light Mode */
+      body.light-mode header .text-cyan-600 { 
+          color: #1e293b !important; /* Slate 800 */
+          font-weight: 700; 
+      }
+
+      /* Ícones e textos secundários do header no modo claro */
+      body.light-mode header .text-gray-500 { color: #334155 !important; } /* Slate 700 */
+      body.light-mode header .text-gray-400 { color: #475569 !important; } /* Slate 600 */
+      
+      /* Buttons inside header light mode */
+      body.light-mode header button:hover { background-color: rgba(255,255,255,0.2) !important; }
+      body.light-mode header .bg-\[\#1a1a1a\] { background-color: #e2e8f0 !important; border-color: #94a3b8 !important; } 
+      body.light-mode header .border-\[\#222\] { border-color: #64748b !important; }
+
+      /* SIDEBAR & PANELS - Clean White/Light Gray in Light Mode */
       body.light-mode aside,
       body.light-mode .bg-\[\#050505\], 
       body.light-mode .bg-black,
@@ -68,60 +133,52 @@
       body.light-mode .bg-\[\#080808\],
       body.light-mode .bg-black\/90,
       body.light-mode .bg-black\/80 {
-        background-color: #e5e7eb !important; /* Slate 200 */
-        border-color: #9ca3af !important; /* Slate 400 */
-        color: #111827 !important; /* Gray 900 */
-        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        background-color: #ffffff !important; 
+        border-color: #e5e7eb !important; /* Light Gray Borders */
+        color: #111827 !important; 
+        box-shadow: 4px 0 24px rgba(0,0,0,0.02);
       }
 
-      /* Backgrounds Secundários (Inputs, Cards Internos) */
+      /* Inputs & Cards in Light Mode */
       body.light-mode .bg-\[\#111\],
       body.light-mode .bg-\[\#161616\],
       body.light-mode .bg-\[\#1a1a1a\] {
-        background-color: #d1d5db !important; /* Slate 300 - Mais escuro para input */
-        border-color: #9ca3af !important;
+        background-color: #f9fafb !important; /* Gray 50 */
+        border-color: #d1d5db !important; /* Gray 300 */
       }
       
-      /* Transparências */
+      /* Transparências / Overlays */
       body.light-mode .bg-black\/60,
       body.light-mode .bg-black\/70,
       body.light-mode .backdrop-blur-md {
-         background-color: rgba(156, 163, 175, 0.9) !important; /* Slate 400 com alfa */
-         border-color: #6b7280 !important;
+         background-color: rgba(255, 255, 255, 0.8) !important;
+         border-color: #e5e7eb !important;
+         color: #000 !important;
       }
 
-      /* Text Colors */
-      body.light-mode .text-gray-500,
-      body.light-mode .text-gray-400,
-      body.light-mode .text-gray-300 {
-        color: #374151 !important; /* Gray 700 - Muito contraste */
+      /* Text Colors (Exceto Header) */
+      body.light-mode :not(header) .text-gray-500,
+      body.light-mode :not(header) .text-gray-400,
+      body.light-mode :not(header) .text-gray-300 {
+        color: #4b5563 !important; /* Gray 600 - Readable */
       }
-
-      body.light-mode .text-white,
-      body.light-mode .text-gray-200 {
-        color: #000000 !important;
+      body.light-mode :not(header) .text-gray-200,
+      body.light-mode :not(header) .text-white {
+         color: #111827 !important; /* Almost Black */
       }
       
-      /* Accent Colors - Ajustados para fundo cinza */
-      body.light-mode .text-yellow-500 { color: #4d7c0f !important; text-shadow: none; } /* Lime-700 Escuro */
-      body.light-mode .text-yellow-400 { color: #3f6212 !important; }
-      body.light-mode .bg-yellow-500 { background-color: #CFFF04 !important; color: #000000 !important; border: 1px solid #6b7280; }
-      
-      body.light-mode .text-cyan-400,
-      body.light-mode .text-cyan-500 { color: #0f766e !important; text-shadow: none; } /* Teal-700 */
-      body.light-mode .bg-cyan-900\/20, 
-      body.light-mode .bg-cyan-900\/10 { background-color: #06b6d430 !important; border: 1px solid #0f766e; } 
-      body.light-mode .border-cyan-500 { border-color: #0f766e !important; }
+      /* Accent Colors - Tuned for Light Backgrounds (Exceto Header) */
+      body.light-mode :not(header) .text-yellow-500 { color: #65a30d !important; text-shadow: none; } /* Lime-600 */
+      body.light-mode :not(header) .text-cyan-400,
+      body.light-mode :not(header) .text-cyan-500 { color: #0891b2 !important; text-shadow: none; } /* Cyan-600 */
+      body.light-mode :not(header) .text-fuchsia-500,
+      body.light-mode :not(header) .text-fuchsia-400 { color: #c026d3 !important; text-shadow: none; } /* Fuchsia-600 */
 
-      body.light-mode .text-fuchsia-500,
-      body.light-mode .text-fuchsia-300 { color: #7e22ce !important; text-shadow: none; } /* Purple-700 */
-      body.light-mode .bg-fuchsia-900\/10 { background-color: #d946ef30 !important; border: 1px solid #7e22ce; }
-      
       /* Borders */
-      body.light-mode .border-\[\#222\],
-      body.light-mode .border-\[\#333\],
-      body.light-mode .border-white\/10 {
-        border-color: #9ca3af !important; /* Slate 400 borders */
+      body.light-mode :not(header) .border-\[\#222\],
+      body.light-mode :not(header) .border-\[\#333\],
+      body.light-mode :not(header) .border-white\/10 {
+        border-color: #e5e7eb !important; 
       }
       
       /* Typography */
@@ -134,11 +191,12 @@
       ::-webkit-scrollbar-track { background: #050505; }
       ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
       
-      body.light-mode ::-webkit-scrollbar-track { background: #9ca3af; }
-      body.light-mode ::-webkit-scrollbar-thumb { background: #4b5563; }
+      body.light-mode ::-webkit-scrollbar-track { background: #f3f4f6; }
+      body.light-mode ::-webkit-scrollbar-thumb { background: #d1d5db; }
 
+      /* Force map container dark/light switch */
       .leaflet-container { background: #050505 !important; }
-      body.light-mode .leaflet-container { background: #9ca3af !important; }
+      body.light-mode .leaflet-container { background: #e5e7eb !important; }
       
       /* Mobile Specific Fixes */
       @media (max-width: 768px) {

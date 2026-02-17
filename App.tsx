@@ -742,7 +742,7 @@ const App: React.FC = () => {
                                             <button 
                                                 onClick={() => state.selectedImage && handleAnalyzeImage(state.selectedImage)}
                                                 disabled={isAnalyzing}
-                                                className="w-full py-3 bg-gradient-to-r from-cyan-900 to-blue-900 hover:from-cyan-800 hover:to-blue-800 rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                                className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)] rounded text-xs font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
                                             >
                                                 {isAnalyzing ? <Loader2 className="animate-spin" size={14}/> : <Sparkles size={14}/>}
                                                 GERAR RELATÓRIO
