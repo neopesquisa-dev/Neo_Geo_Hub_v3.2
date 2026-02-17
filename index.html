@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -46,20 +47,20 @@
         transition: background-color 0.3s ease, color 0.3s ease;
       }
 
-      /* LIGHT MODE ENGINE */
+      /* LIGHT MODE ENGINE (UPDATED - DARKER GREY) */
       body.light-mode {
-        background-color: #cccccc !important; /* Cinza mais escuro (Silver) para reduzir brilho */
-        color: #171717 !important; /* Neutral 900 */
+        background-color: #9ca3af !important; /* Slate 400 - Cinza Médio Técnico */
+        color: #000000 !important; /* Contraste máximo */
       }
       
-      /* Cabeçalho Específico - Cinza mais evidente */
+      /* Cabeçalho Específico - Cinza Claro (Atualizado) */
       body.light-mode header {
-         background-color: #bfbfbf !important; /* Um pouco mais escuro que o fundo */
-         border-color: #999999 !important;
-         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+         background-color: #e5e7eb !important; /* Slate 200 - Cinza Claro */
+         border-color: #9ca3af !important; /* Slate 400 */
+         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       }
       
-      /* Sidebar e Painéis - Off-white para destacar do fundo cinza */
+      /* Sidebar e Painéis - Cinza Claro (não branco) */
       body.light-mode aside,
       body.light-mode .bg-\[\#050505\], 
       body.light-mode .bg-black,
@@ -67,33 +68,33 @@
       body.light-mode .bg-\[\#080808\],
       body.light-mode .bg-black\/90,
       body.light-mode .bg-black\/80 {
-        background-color: #f0f0f0 !important; /* Neutral 100 - Mais claro que o fundo */
-        border-color: #999999 !important; /* Neutral 400 */
-        color: #171717 !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background-color: #e5e7eb !important; /* Slate 200 */
+        border-color: #9ca3af !important; /* Slate 400 */
+        color: #111827 !important; /* Gray 900 */
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
       }
 
       /* Backgrounds Secundários (Inputs, Cards Internos) */
       body.light-mode .bg-\[\#111\],
       body.light-mode .bg-\[\#161616\],
       body.light-mode .bg-\[\#1a1a1a\] {
-        background-color: #e0e0e0 !important; /* Cinza claro para inputs */
-        border-color: #a3a3a3 !important;
+        background-color: #d1d5db !important; /* Slate 300 - Mais escuro para input */
+        border-color: #9ca3af !important;
       }
       
       /* Transparências */
       body.light-mode .bg-black\/60,
       body.light-mode .bg-black\/70,
       body.light-mode .backdrop-blur-md {
-         background-color: rgba(220, 220, 220, 0.9) !important;
-         border-color: #999999 !important;
+         background-color: rgba(156, 163, 175, 0.9) !important; /* Slate 400 com alfa */
+         border-color: #6b7280 !important;
       }
 
       /* Text Colors */
       body.light-mode .text-gray-500,
       body.light-mode .text-gray-400,
       body.light-mode .text-gray-300 {
-        color: #404040 !important; /* Neutral 700 - Mais contraste */
+        color: #374151 !important; /* Gray 700 - Muito contraste */
       }
 
       body.light-mode .text-white,
@@ -101,26 +102,26 @@
         color: #000000 !important;
       }
       
-      /* Accent Colors - Mantendo tons Neon */
-      body.light-mode .text-yellow-500 { color: #65a30d !important; text-shadow: none; } /* Lime-600 */
-      body.light-mode .text-yellow-400 { color: #4d7c0f !important; }
-      body.light-mode .bg-yellow-500 { background-color: #CFFF04 !important; color: #000000 !important; border: 1px solid #999999; }
+      /* Accent Colors - Ajustados para fundo cinza */
+      body.light-mode .text-yellow-500 { color: #4d7c0f !important; text-shadow: none; } /* Lime-700 Escuro */
+      body.light-mode .text-yellow-400 { color: #3f6212 !important; }
+      body.light-mode .bg-yellow-500 { background-color: #CFFF04 !important; color: #000000 !important; border: 1px solid #6b7280; }
       
       body.light-mode .text-cyan-400,
-      body.light-mode .text-cyan-500 { color: #0e7490 !important; text-shadow: none; } /* Cyan-700 */
+      body.light-mode .text-cyan-500 { color: #0f766e !important; text-shadow: none; } /* Teal-700 */
       body.light-mode .bg-cyan-900\/20, 
-      body.light-mode .bg-cyan-900\/10 { background-color: #06b6d420 !important; border: 1px solid #0e7490; } 
-      body.light-mode .border-cyan-500 { border-color: #0e7490 !important; }
+      body.light-mode .bg-cyan-900\/10 { background-color: #06b6d430 !important; border: 1px solid #0f766e; } 
+      body.light-mode .border-cyan-500 { border-color: #0f766e !important; }
 
       body.light-mode .text-fuchsia-500,
-      body.light-mode .text-fuchsia-300 { color: #a21caf !important; text-shadow: none; } /* Fuchsia-700 */
-      body.light-mode .bg-fuchsia-900\/10 { background-color: #d946ef20 !important; border: 1px solid #a21caf; }
+      body.light-mode .text-fuchsia-300 { color: #7e22ce !important; text-shadow: none; } /* Purple-700 */
+      body.light-mode .bg-fuchsia-900\/10 { background-color: #d946ef30 !important; border: 1px solid #7e22ce; }
       
       /* Borders */
       body.light-mode .border-\[\#222\],
       body.light-mode .border-\[\#333\],
       body.light-mode .border-white\/10 {
-        border-color: #999999 !important;
+        border-color: #9ca3af !important; /* Slate 400 borders */
       }
       
       /* Typography */
@@ -133,11 +134,11 @@
       ::-webkit-scrollbar-track { background: #050505; }
       ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
       
-      body.light-mode ::-webkit-scrollbar-track { background: #cccccc; }
-      body.light-mode ::-webkit-scrollbar-thumb { background: #737373; }
+      body.light-mode ::-webkit-scrollbar-track { background: #9ca3af; }
+      body.light-mode ::-webkit-scrollbar-thumb { background: #4b5563; }
 
       .leaflet-container { background: #050505 !important; }
-      body.light-mode .leaflet-container { background: #cccccc !important; }
+      body.light-mode .leaflet-container { background: #9ca3af !important; }
       
       /* Mobile Specific Fixes */
       @media (max-width: 768px) {

@@ -45,8 +45,9 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
   // Update Scene Background based on Theme
   useEffect(() => {
     if (sceneRef.current) {
-        // Dark Mode: #020202 (Black-ish), Light Mode: #cccccc (Darker Silver/Gray)
-        const bgColor = theme === 'light' ? 0xcccccc : 0x020202;
+        // Dark Mode: #020202 (Black-ish)
+        // Light Mode: #9ca3af (Slate 400) - Escurecido para corresponder ao novo tema
+        const bgColor = theme === 'light' ? 0x9ca3af : 0x020202;
         sceneRef.current.background = new THREE.Color(bgColor);
     }
   }, [theme]);
@@ -57,11 +58,12 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
     
     const scene = new THREE.Scene();
     // Default background setup
-    const bgColor = theme === 'light' ? 0xcccccc : 0x020202;
+    const bgColor = theme === 'light' ? 0x9ca3af : 0x020202;
     scene.background = new THREE.Color(bgColor);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(60, mountNode.clientWidth / mountNode.clientHeight, 0.1, 1000000);
+    // Posição inicial temporária, será ajustada após o carregamento
     camera.position.set(50, 50, 50);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
@@ -120,6 +122,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
         bbox.getCenter(center);
         
         // CENTRALIZAÇÃO AUTOMÁTICA NA ORIGEM
+        // Move o centro X/Z para 0,0 e a base Y para 0
         geometry.translate(-center.x, -bbox.min.y, -center.z);
         geometry.computeBoundingBox();
         
@@ -163,11 +166,19 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
             heightRange: [minH, maxH]
         });
         
-        // Ajustar Camera
+        // --- AJUSTE DE CÂMERA (ZOOM & CENTRALIZAÇÃO) ---
         const size = bbox.getSize(new THREE.Vector3());
-        const radius = size.length();
-        camera.position.set(radius, radius, radius);
+        
+        // Fator de Zoom: 0.5 da diagonal da caixa (Aproxima mais que o padrão 1.0)
+        const zoomFactor = 0.5; 
+        const distance = size.length() * zoomFactor;
+        
+        // Posicionar câmera numa isométrica próxima
+        camera.position.set(distance, distance, distance);
+        
+        // Centralizar o alvo no meio da altura do modelo
         controls.target.set(0, size.y / 2, 0);
+        controls.update();
 
       } catch (e) {
         console.error("3D Viewer Error:", e);
@@ -254,7 +265,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
   }, [pointSize, colorMode, transform]);
 
   return (
-    <div className={`w-full h-full relative font-mono overflow-hidden ${theme === 'light' ? 'bg-[#cccccc]' : 'bg-[#020202]'}`}>
+    <div className={`w-full h-full relative font-mono overflow-hidden ${theme === 'light' ? 'bg-[#9ca3af]' : 'bg-[#020202]'}`}>
       <div ref={mountRef} className="w-full h-full" />
       
       {isLoading && (

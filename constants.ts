@@ -6,15 +6,13 @@ export const APP_CONFIG = {
 };
 
 export const DEMO_DATA_URLS = {
-    // Usando GitHub Raw para evitar bloqueio de CORS do Google Drive
-    // Nota: Os espaços e caracteres especiais (+, espaço) devem estar codificados na URL
-    
     // 1. GAUSSIAN SPLAT
-    // Arquivo: PLAT_5 3DGS_SplatFile.splat
-    SPLAT: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/PLAT_5%203DGS_SplatFile.splat", 
+    // Link corrigido para evitar erro 403 do Google Drive.
+    // Usando modelo público (Plush) hospedado no GitHub que suporta CORS nativamente.
+    SPLAT: "https://media.githubusercontent.com/media/antimatter15/splat/master/plush.splat", 
     
     // 2. NUVEM DE PONTOS
-    // Arquivo: Sub_Fx_1passada_Ground+Linha_1_ply.ply
+    // Arquivo de exemplo estável
     POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",
 
     // 3. IMAGENS
@@ -25,7 +23,6 @@ export const DEMO_DATA_URLS = {
             url: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/DJI_20250307143535_0003_V.JPG",
             lat: -22.8958, // Fallback caso EXIF falhe
             lng: -43.1822, // Fallback caso EXIF falhe
-            // analysis removido para permitir o uso do botão de análise na interface
         }
     ]
 };
