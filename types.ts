@@ -13,7 +13,8 @@ export type Language = 'pt' | 'en';
 export interface UserProfile {
   id: string;
   name: string;
-  role: 'ADMIN' | 'VIEWER' | 'EDITOR';
+  email: string;
+  role: 'ADMIN' | 'VIEWER' | 'EDITOR' | 'DEMO';
   organization: string;
   avatarUrl?: string;
   activeWorkspaceId: string;

@@ -6,28 +6,30 @@ export const APP_CONFIG = {
 };
 
 export const DEMO_DATA_URLS = {
-    // 1. GAUSSIAN SPLAT
-    // Usando media.githubusercontent.com para garantir suporte a arquivos LFS (Large File Storage)
-    // Isso evita erros 404 ou carregamento de "pointers" de texto em vez do binário
-    SPLAT: "https://media.githubusercontent.com/media/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat", 
-    
-    // 2. NUVEM DE PONTOS
-    POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",
+  // 1. GAUSSIAN SPLAT
+  // Usando media.githubusercontent.com para garantir suporte a arquivos LFS (Large File Storage)
+  // Isso evita erros 404 ou carregamento de "pointers" de texto em vez do binário
+  SPLAT: "https://media.githubusercontent.com/media/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat",
 
-    // 3. IMAGENS
-    DEMO_IMAGES: [
-        {
-            filename: "DJI_20250307143535_0003_V.JPG",
-            url: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/DJI_20250307143535_0003_V.JPG",
-            lat: -22.8958, // Fallback caso EXIF falhe
-            lng: -43.1822, // Fallback caso EXIF falhe
-        }
-    ]
+  // 2. NUVEM DE PONTOS
+  POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",
+
+  // 3. IMAGENS
+  DEMO_IMAGES: [
+    {
+      filename: "DJI_20250307143535_0003_V.JPG",
+      url: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/DJI_20250307143535_0003_V.JPG",
+      lat: -22.8958, // Fallback caso EXIF falhe
+      lng: -43.1822, // Fallback caso EXIF falhe
+    }
+  ]
 };
 
+/** @deprecated Use AuthContext instead */
 export const MOCK_USER = {
   id: 'usr-001',
   name: 'Drone_Operator',
+  email: 'operator@neogeo.hub',
   role: 'ADMIN' as const,
   organization: 'NeoGeo Hub',
   activeWorkspaceId: 'demo-session',
