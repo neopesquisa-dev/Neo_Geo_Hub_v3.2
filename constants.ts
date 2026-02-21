@@ -9,7 +9,7 @@ export const DEMO_DATA_URLS = {
     // 1. GAUSSIAN SPLAT
     // Usando media.githubusercontent.com para garantir suporte a arquivos LFS (Large File Storage)
     // Isso evita erros 404 ou carregamento de "pointers" de texto em vez do binário
-    SPLAT: "https://media.githubusercontent.com/media/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat", 
+    SPLAT: "https://raw.githubusercontent.com/media/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat", 
     
     // 2. NUVEM DE PONTOS
     POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",
