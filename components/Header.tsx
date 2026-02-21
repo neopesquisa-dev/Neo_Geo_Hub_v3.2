@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Map, Image as ImageIcon, Menu, Database, ClipboardList, Settings, User, Server, LogOut } from 'lucide-react';
+import { Box, Map, Image as ImageIcon, Menu, Database, ClipboardList, Settings, User, Server } from 'lucide-react';
 import { ViewMode, AppSettings, UserProfile, Workspace } from '../types';
 import { APP_CONFIG, TRANSLATIONS } from '../constants';
 
@@ -12,41 +12,40 @@ interface HeaderProps {
   onOpenSettings: () => void;
   onOpenProfile: () => void;
   onSwitchWorkspace: () => void;
-  onLogout: () => void;
   settings: AppSettings;
   user: UserProfile;
   activeWorkspace: Workspace;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  currentMode, setMode, toggleSidebar, onOpenReport, onOpenSettings, onOpenProfile, onSwitchWorkspace, onLogout,
-  settings, user, activeWorkspace
+const Header: React.FC<HeaderProps> = ({ 
+    currentMode, setMode, toggleSidebar, onOpenReport, onOpenSettings, onOpenProfile, onSwitchWorkspace,
+    settings, user, activeWorkspace 
 }) => {
   const t = TRANSLATIONS[settings.language];
 
   return (
     <header className="h-14 md:h-16 bg-[#050505] border-b border-[#222] flex items-center justify-between px-3 md:px-4 z-50 select-none relative transition-colors shrink-0">
       <div className="flex items-center gap-2 md:gap-6 flex-1 min-w-0">
-        <button
-          className="md:hidden text-gray-500 hover:text-white p-1.5 -ml-1.5 rounded-lg active:bg-white/10 transition-colors shrink-0"
-          onClick={toggleSidebar}
+        <button 
+            className="md:hidden text-gray-500 hover:text-white p-1.5 -ml-1.5 rounded-lg active:bg-white/10 transition-colors shrink-0"
+            onClick={toggleSidebar}
         >
-          <Menu size={20} />
+            <Menu size={20} />
         </button>
 
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <div className="h-6 md:h-10 w-auto flex items-center flex-shrink-0">
-            <img
-              src={APP_CONFIG.LOGO_SOURCE}
-              alt={APP_CONFIG.APP_TITLE}
-              className="h-full w-auto object-contain"
-            />
+              <img 
+                  src={APP_CONFIG.LOGO_SOURCE}
+                  alt={APP_CONFIG.APP_TITLE} 
+                  className="h-full w-auto object-contain"
+              />
           </div>
-
-          <div
-            className="flex flex-col justify-center cursor-pointer group min-w-0"
-            onClick={() => setMode(ViewMode.MODE_3D)}
-            title="Voltar para Workspace"
+          
+          <div 
+              className="flex flex-col justify-center cursor-pointer group min-w-0"
+              onClick={() => setMode(ViewMode.MODE_3D)}
+              title="Voltar para Workspace"
           >
             {/* Title FULL on Mobile and Desktop */}
             <h1 className="text-sm md:text-xl font-bold text-white tracking-tighter leading-none font-code uppercase transition-colors whitespace-nowrap">
@@ -60,23 +59,23 @@ const Header: React.FC<HeaderProps> = ({
             </span>
           </div>
         </div>
-
+        
         <div className="h-6 md:h-8 w-px bg-[#222] hidden md:block"></div>
 
         <div className="bg-[#0a0a0a] rounded p-1 border border-[#222] hidden md:flex font-code">
-          <button
+          <button 
             onClick={() => setMode(ViewMode.MODE_3D)}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-xs font-bold uppercase tracking-tight transition-all ${currentMode === ViewMode.MODE_3D ? 'bg-cyan-900/20 text-cyan-400 border border-cyan-500/50' : 'text-gray-500 hover:text-gray-300'}`}
           >
             <Box size={14} /> <span>{t.nav_workspace}</span>
           </button>
-          <button
+          <button 
             onClick={() => setMode(ViewMode.MODE_MAP)}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-xs font-bold uppercase tracking-tight transition-all ${currentMode === ViewMode.MODE_MAP ? 'bg-cyan-900/20 text-cyan-400 border border-cyan-500/50' : 'text-gray-500 hover:text-gray-300'}`}
           >
             <Map size={14} /> <span>{t.nav_map}</span>
           </button>
-          <button
+          <button 
             onClick={() => setMode(ViewMode.MODE_GALLERY)}
             className={`flex items-center gap-2 px-4 py-1.5 rounded text-xs font-bold uppercase tracking-tight transition-all ${currentMode === ViewMode.MODE_GALLERY ? 'bg-cyan-900/20 text-cyan-400 border border-cyan-500/50' : 'text-gray-500 hover:text-gray-300'}`}
           >
@@ -86,73 +85,43 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 font-code shrink-0">
-        <button
-          onClick={onSwitchWorkspace}
-          className={`flex items-center gap-2 px-2 md:px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-tight transition-all max-w-[90px] xs:max-w-[120px] md:max-w-none
-            ${activeWorkspace.id === 'demo-session'
-              ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/20 hover:border-yellow-500'
-              : 'bg-[#1a1a1a] border-[#333] text-gray-400 hover:border-gray-400 hover:text-white'}
+        <button 
+            onClick={onSwitchWorkspace}
+            className={`flex items-center gap-2 px-2 md:px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-tight transition-all max-w-[90px] xs:max-w-[120px] md:max-w-none
+            ${activeWorkspace.id === 'demo-session' 
+                ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/20 hover:border-yellow-500' 
+                : 'bg-[#1a1a1a] border-[#333] text-gray-400 hover:border-gray-400 hover:text-white'}
             `}
         >
-          <Server size={12} className="shrink-0" />
-          <span className="flex flex-col items-start leading-none gap-0.5 overflow-hidden">
-            <span className="text-[7px] opacity-60 hidden md:inline">SESSION:</span>
-            <span className="truncate w-full text-left">{activeWorkspace.name}</span>
-          </span>
+            <Server size={12} className="shrink-0" />
+            <span className="flex flex-col items-start leading-none gap-0.5 overflow-hidden">
+                <span className="text-[7px] opacity-60 hidden md:inline">SESSION:</span>
+                <span className="truncate w-full text-left">{activeWorkspace.name}</span>
+            </span>
         </button>
 
         <div className="h-6 w-px bg-[#222] hidden md:block"></div>
 
-        <button
+        <button 
           onClick={onOpenReport}
           className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-fuchsia-900/10 hover:bg-fuchsia-900/30 border border-fuchsia-500/30 hover:border-fuchsia-500 rounded text-[11px] text-fuchsia-300 font-bold uppercase tracking-tight transition-all"
         >
-          <ClipboardList size={14} />
-          {t.nav_report}
+            <ClipboardList size={14} />
+            {t.nav_report}
         </button>
 
         <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-[#0a0a0a] border border-[#222] rounded text-[10px] text-gray-500 tracking-tight">
-          <Database size={10} className="text-yellow-500 animate-pulse" />
-          {t.sys_online}
+            <Database size={10} className="text-yellow-500 animate-pulse" />
+            {t.sys_online}
         </div>
-
+        
         <button
           onClick={onOpenSettings}
           className="p-1.5 md:p-2 text-gray-500 hover:text-cyan-400 transition-colors rounded-full hover:bg-[#111]"
           title="Configurações"
         >
-          <Settings size={18} />
+           <Settings size={18} />
         </button>
-
-        <div className="h-6 w-px bg-[#222] hidden md:block"></div>
-
-        {/* User avatar + logout */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenProfile}
-            className="flex items-center gap-2 group"
-            title={user.name}
-          >
-            <img
-              src={user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D8ABC&color=fff&bold=true&size=32`}
-              alt={user.name}
-              className="w-7 h-7 rounded-full border border-[#333] group-hover:border-cyan-500 transition-all"
-            />
-            <span className="hidden lg:block text-[10px] text-gray-400 group-hover:text-white font-mono uppercase transition-colors">{user.name}</span>
-            <span className={`hidden lg:block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${user.role === 'ADMIN' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' :
-                user.role === 'EDITOR' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30' :
-                  user.role === 'DEMO' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-              }`}>{user.role}</span>
-          </button>
-          <button
-            onClick={onLogout}
-            className="p-1.5 text-gray-600 hover:text-red-400 transition-colors rounded-full hover:bg-red-500/10"
-            title="Sair"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
       </div>
     </header>
   );

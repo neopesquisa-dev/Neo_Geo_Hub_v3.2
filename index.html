@@ -1,15 +1,231 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Neo Geo Hub .v³ - Digital Twin Platform</title>
+    <!-- Tailwind via CDN is fine for simple migration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              yellow: {
+                500: '#CFFF04', /* Neon Yellow Principal */
+                600: '#A4CC00', /* Contraste para Texto */
+                400: '#DBFF4D', /* Hover */
+                900: '#2A3300', /* Fundo profundo */
+              },
+              fuchsia: {
+                500: '#FF00FF',
+              },
+              cyan: {
+                500: '#00FFFF',
+              }
+            },
+            screens: {
+              'xs': '380px',
+            }
+          }
+        }
+      }
+    </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- EXIF JS script tag kept for compatibility -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    
+    <!-- Google Fonts: JetBrains Mono (Code/IDE Look), Fira Code (Alt Code) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
+
+    <style>
+      body {
+        background-color: #000000;
+        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* LIGHT MODE ENGINE - BALANCED DESIGN */
+      body.light-mode {
+        background-color: #f3f4f6 !important; /* Gray 100 - Clean Light Background */
+        color: #1f2937 !important; /* Gray 800 - High Contrast Text */
+      }
+      
+      /* CABEÇALHO NO MODO CLARO */
+      body.light-mode header {
+         background-color: #94a3b8 !important; /* Slate 400 - Cinza médio para suportar texto preto e hover neon */
+         border-color: #64748b !important; /* Slate 500 */
+         color: #0f172a !important; /* Slate 900 */
+         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+      }
+
+      /* LOGO BACKGROUND FIX - MODO CLARO (FADE) */
+      body.light-mode .logo-wrapper {
+          background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 60%, transparent 100%) !important;
+          border-radius: 100%;
+          padding: 5px 15px;
+          border: none;
+          box-shadow: none;
+      }
+      
+      /* ESTILOS DO TÍTULO NO MODO CLARO */
+      
+      /* Estado Padrão: PRETO (Conforme solicitado) */
+      body.light-mode header h1, 
+      body.light-mode header h1 span {
+          color: #000000 !important; /* Texto Preto Original */
+          text-shadow: none;
+          transition: color 0.3s ease, text-shadow 0.3s ease;
+      }
+      
+      /* HOVER: CORES NEON (Mesmas do Dark Mode) com Sombra Forte para Leitura no Fundo Claro */
+      
+      /* "Neo" -> Cyan */
+      body.light-mode header .group:hover h1 span.group-hover\:text-cyan-400 { 
+          color: #00FFFF !important; 
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* Sombra escura para contraste */
+      }
+      /* "Geo" -> Fuchsia */
+      body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-500 { 
+          color: #FF00FF !important; 
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      }
+      /* "Hub" -> Yellow */
+      body.light-mode header .group:hover h1 span.group-hover\:text-yellow-500 { 
+          color: #CFFF04 !important; 
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      }
+      
+      /* ".v3" Suffix */
+      body.light-mode header h1 span.text-fuchsia-500 { 
+          color: #a21caf !important; /* Fuchsia 700 - Base state visível */
+      }
+      body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-400 {
+           color: #FF00FF !important; /* Neon no hover */
+           text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      }
+
+      /* Subtítulo - Preto/Cinza Escuro no Light Mode */
+      body.light-mode header .text-cyan-600 { 
+          color: #1e293b !important; /* Slate 800 */
+          font-weight: 700; 
+      }
+
+      /* Ícones e textos secundários do header no modo claro */
+      body.light-mode header .text-gray-500 { color: #334155 !important; } /* Slate 700 */
+      body.light-mode header .text-gray-400 { color: #475569 !important; } /* Slate 600 */
+      
+      /* Buttons inside header light mode */
+      body.light-mode header button:hover { background-color: rgba(255,255,255,0.2) !important; }
+      body.light-mode header .bg-\[\#1a1a1a\] { background-color: #e2e8f0 !important; border-color: #94a3b8 !important; } 
+      body.light-mode header .border-\[\#222\] { border-color: #64748b !important; }
+
+      /* SIDEBAR & PANELS - Clean White/Light Gray in Light Mode */
+      body.light-mode aside,
+      body.light-mode .bg-\[\#050505\], 
+      body.light-mode .bg-black,
+      body.light-mode .bg-\[\#0a0a0a\],
+      body.light-mode .bg-\[\#080808\],
+      body.light-mode .bg-black\/90,
+      body.light-mode .bg-black\/80 {
+        background-color: #ffffff !important; 
+        border-color: #e5e7eb !important; /* Light Gray Borders */
+        color: #111827 !important; 
+        box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+      }
+
+      /* Inputs & Cards in Light Mode */
+      body.light-mode .bg-\[\#111\],
+      body.light-mode .bg-\[\#161616\],
+      body.light-mode .bg-\[\#1a1a1a\] {
+        background-color: #f9fafb !important; /* Gray 50 */
+        border-color: #d1d5db !important; /* Gray 300 */
+      }
+      
+      /* Transparências / Overlays */
+      body.light-mode .bg-black\/60,
+      body.light-mode .bg-black\/70,
+      body.light-mode .backdrop-blur-md {
+         background-color: rgba(255, 255, 255, 0.8) !important;
+         border-color: #e5e7eb !important;
+         color: #000 !important;
+      }
+
+      /* Text Colors (Exceto Header) */
+      body.light-mode :not(header) .text-gray-500,
+      body.light-mode :not(header) .text-gray-400,
+      body.light-mode :not(header) .text-gray-300 {
+        color: #4b5563 !important; /* Gray 600 - Readable */
+      }
+      body.light-mode :not(header) .text-gray-200,
+      body.light-mode :not(header) .text-white {
+         color: #111827 !important; /* Almost Black */
+      }
+      
+      /* Accent Colors - Tuned for Light Backgrounds (Exceto Header) */
+      body.light-mode :not(header) .text-yellow-500 { color: #65a30d !important; text-shadow: none; } /* Lime-600 */
+      body.light-mode :not(header) .text-cyan-400,
+      body.light-mode :not(header) .text-cyan-500 { color: #0891b2 !important; text-shadow: none; } /* Cyan-600 */
+      body.light-mode :not(header) .text-fuchsia-500,
+      body.light-mode :not(header) .text-fuchsia-400 { color: #c026d3 !important; text-shadow: none; } /* Fuchsia-600 */
+
+      /* Borders */
+      body.light-mode :not(header) .border-\[\#222\],
+      body.light-mode :not(header) .border-\[\#333\],
+      body.light-mode :not(header) .border-white\/10 {
+        border-color: #e5e7eb !important; 
+      }
+      
+      /* Typography */
+      .font-code { font-family: 'Fira Code', 'JetBrains Mono', monospace; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
+      
+      /* Scrollbars */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #050505; }
+      ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+      
+      body.light-mode ::-webkit-scrollbar-track { background: #f3f4f6; }
+      body.light-mode ::-webkit-scrollbar-thumb { background: #d1d5db; }
+
+      /* Force map container dark/light switch */
+      .leaflet-container { background: #050505 !important; }
+      body.light-mode .leaflet-container { background: #e5e7eb !important; }
+      
+      /* Mobile Specific Fixes */
+      @media (max-width: 768px) {
+        .custom-mobile-header-title { display: none; }
+        /* Prevent scroll bounce on iOS */
+        html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "three/": "https://esm.sh/three@^0.182.0/",
+    "three": "https://esm.sh/three@^0.182.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.3",
+    "leaflet": "https://esm.sh/leaflet@^1.9.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "dexie": "https://esm.sh/dexie@^4.3.0",
+    "@mkkellogg/gaussian-splats-3d": "https://esm.sh/@mkkellogg/gaussian-splats-3d@^0.4.7",
+    "dexie-react-hooks": "https://esm.sh/dexie-react-hooks@^4.2.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

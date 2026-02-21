@@ -6,15 +6,15 @@ export default defineConfig(({ mode }) => {
   // Agora o TypeScript reconhece 'process' nativamente graças à correção no tsconfig.json
   // Casting process to any to avoid TS error about cwd() missing on type Process
   const env = loadEnv(mode, (process as any).cwd(), '');
-
+  
   return {
-    base: './',
+    base: './', 
     plugins: [react()],
     publicDir: 'public',
     server: {
       headers: {
         'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'credentialless',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
       }
     },
     define: {

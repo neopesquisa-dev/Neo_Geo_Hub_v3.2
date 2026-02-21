@@ -1,4 +1,0 @@
-public/demo/SUBESTACAO_RGB_2_splat.splat filter=lfs diff=lfs merge=lfs -text
-public/Demo/SUBESTACAO_RGB_2_splat.splat filter=lfs diff=lfs merge=lfs -text
-*.splat filter=lfs diff=lfs merge=lfs -text
-.splat filter=lfs diff=lfs merge=lfs -text
