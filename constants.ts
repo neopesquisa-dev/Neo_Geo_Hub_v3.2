@@ -1,15 +1,14 @@
 
 export const APP_CONFIG = {
-  LOGO_SOURCE: "https://i.ibb.co/gF3dhZwz/logo.png",
+  LOGO_SOURCE: "logo.png",
   APP_TITLE: "Neo Geo Hub .v³",
   APP_SUBTITLE: "Digital Twin Platform"
 };
 
 export const DEMO_DATA_URLS = {
     // 1. GAUSSIAN SPLAT
-    // Usando media.githubusercontent.com para garantir suporte a arquivos LFS (Large File Storage)
-    // Isso evita erros 404 ou carregamento de "pointers" de texto em vez do binário
-    SPLAT: "https://media.githubusercontent.com/media/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat", 
+    // Atualizado para URL raw direta conforme solicitação
+    SPLAT: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/SUBESTACAO_RGB_2_splat.splat", 
     
     // 2. NUVEM DE PONTOS
     POINT_CLOUD: "https://raw.githubusercontent.com/neopesquisa-dev/Neo_Geo_Hub_v3.2/main/public/Demo/Sub_Fx_1passada_Ground%2BLinha_1_ply.ply",

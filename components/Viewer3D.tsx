@@ -114,20 +114,24 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
         geometry.translate(-center.x, -bbox.min.y, -center.z);
         geometry.computeBoundingBox();
         
+        // Atualiza referências após transformação
         const positions = geometry.attributes.position.array as Float32Array;
-        const heights = new Float32Array(geometry.attributes.position.count);
+        const count = geometry.attributes.position.count;
+        const heights = new Float32Array(count);
         
         let minH = Infinity;
         let maxH = -Infinity;
 
-        for(let i=0; i<heights.length; i++) {
-            const h = positions[i*3 + 1]; // Agora Y é a altura
+        for(let i=0; i<count; i++) {
+            const h = positions[i*3 + 1]; // Agora Y é a altura (após rotação)
             heights[i] = h;
             if (h < minH) minH = h;
             if (h > maxH) maxH = h;
         }
 
-        const classifications = (geometry.attributes as any).classification || (geometry.attributes as any).class;
+        // Detecção robusta de classificação
+        const attrs = geometry.attributes as any;
+        const classifications = attrs.classification || attrs.class || attrs.scalar_Scalar_field;
         
         geometry.userData = {
           originalColors: geometry.attributes.color ? (geometry.attributes.color.array as Float32Array).slice() : null,
@@ -137,8 +141,9 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
           classifications: classifications ? (classifications.array as Uint8Array).slice() : null
         };
 
+        // Se não tiver cor original, força modo HEIGHT
         if (!geometry.attributes.color) {
-            geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(heights.length * 3).fill(0.8), 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(count * 3).fill(0.8), 3));
             setColorMode('HEIGHT');
         }
 
@@ -149,7 +154,7 @@ const Viewer3D: React.FC<ViewerProps> = ({ activeLayer, theme }) => {
         pointsRef.current = points;
 
         setDebugInfo({ 
-            count: heights.length, 
+            count: count, 
             hasClass: !!classifications,
             heightRange: [minH, maxH]
         });

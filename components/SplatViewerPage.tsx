@@ -68,7 +68,7 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
   const [markerText, setMarkerText] = useState("");
 
   useEffect(() => {
-    // Captura a referência do nó no início (closure)
+    // Captura a referência do nó no início (closure) para garantir acesso no cleanup
     const mountNode = containerRef.current;
     
     // Evita inicialização dupla no React StrictMode
@@ -84,12 +84,12 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
         setError(null);
         setProgress(5);
 
-        // Limpa qualquer conteúdo residual antes de iniciar
+        // Limpa qualquer conteúdo residual com segurança
         if (mountNode) mountNode.innerHTML = '';
 
         viewer = new SplatViewer({
           'cameraUp': [0, 1, 0], 
-          'initialCameraPosition': [0, 5, 10],
+          'initialCameraPosition': [0, 100, 200],
           'initialCameraLookAt': [0, 0, 0],
           'rootElement': mountNode,
           'sharedMemoryForWorkers': window.crossOriginIsolated,
@@ -98,18 +98,19 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
           'selfDrivenMode': true
         });
 
+        // Atribui ao ref imediatamente para o cleanup ter acesso
         viewerRef.current = viewer;
 
-        // Configuração do Raycaster para pontos (caso o splat seja renderizado como pontos)
+        // Configuração do Raycaster
         raycasterRef.current.params.Points.threshold = 0.1;
 
         const formatCode = layer.format === 'PLY' ? 2 : 0;
 
         await viewer.addSplatScene(layer.url, {
-          'splatAlphaRemovalThreshold': 5, // Ajuste para melhor performance/visual
+          'splatAlphaRemovalThreshold': 5,
           'showLoadingUI': false,
           'position': [0, 0, 0],
-          'rotation': [0.7071068, -0.7071068, 0, 0], // Native Z-up to Y-up rotation
+          'rotation': [0.7071068, -0.7071068, 0, 0],
           'scale': [1, 1, 1],
           'format': formatCode,
           'onProgress': (percent: number, label: string) => {
@@ -120,8 +121,8 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
           }
         });
 
-        // Se o componente foi desmontado durante o carregamento, paramos aqui.
-        // NÃO chamamos dispose() aqui, pois o cleanup do useEffect já o fez (ou fará) via viewerRef.
+        // Se desmontou durante o carregamento, apenas retorna. 
+        // O cleanup function do useEffect cuidará do dispose via viewerRef.
         if (!isMounted) return;
 
         // Adiciona Grupo de Ferramentas à Cena
@@ -157,7 +158,7 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
       }
     };
 
-    // Pequeno delay para garantir que o DOM está pronto
+    // Pequeno delay para garantir estabilidade do DOM
     const timer = setTimeout(initViewer, 50);
 
     return () => {
@@ -167,29 +168,34 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
       const v = viewerRef.current;
       if (v) {
         try {
-          // Tenta limpar suavemente primeiro
+          // Desativa controles para evitar eventos durante dispose
+          if (v.controls) v.controls.enabled = false;
+          
           if (v.stop) v.stop();
           
-          // Dispose com tratamento de erro específico para DOM
+          // Tenta dispose
           v.dispose();
         } catch (e: any) {
-          // Ignora erro específico de 'removeChild' que ocorre se o React já removeu o nó pai
-          if (e instanceof DOMException || (e.message && e.message.includes && e.message.includes('removeChild'))) {
-             // Erro esperado em race-conditions de cleanup, ignorar.
+          // Engole erros comuns de DOM durante unmount rápido (race conditions)
+          const msg = e instanceof Error ? e.message : String(e);
+          if (
+            msg.includes('removeChild') || 
+            msg.includes('not a child') || 
+            msg.includes('node to be removed')
+          ) {
+             // Ignorar erro esperado
           } else {
              console.warn("Viewer dispose warning:", e);
           }
         }
       }
       
-      // Limpeza manual final do container para evitar vazamento de memória ou canvas fantasma
+      // Limpeza manual final do container
       if (mountNode) {
           try {
-            while (mountNode.firstChild) {
-                mountNode.removeChild(mountNode.firstChild);
-            }
+             mountNode.innerHTML = '';
           } catch (e) {
-            // Ignorar se o mountNode já estiver desanexado
+             // Ignorar
           }
       }
 
@@ -353,7 +359,7 @@ const SplatViewerPage: React.FC<SplatViewerPageProps> = ({ layer, onExit }) => {
     setRotation({ x: 0, y: -90, z: 0 });
     setIsPlaying(false);
     if(viewerRef.current && viewerRef.current.camera) {
-        viewerRef.current.camera.position.set(0, 5, 10);
+        viewerRef.current.camera.position.set(0, 100, 200);
         viewerRef.current.camera.lookAt(0, 0, 0);
     }
   };

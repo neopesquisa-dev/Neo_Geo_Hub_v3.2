@@ -391,8 +391,8 @@ const PhotoGallery: React.FC<GalleryProps> = ({ layers, onSelectImage, onUpdateI
                                )}
                           </div>
                       ) : (
-                          <div className="h-full flex flex-col items-center justify-center opacity-30">
-                              <BrainCircuit size={64} className="text-gray-700 mb-4" />
+                          <div className="h-full flex flex-col items-center justify-center">
+                              <BrainCircuit size={64} className="text-gray-600 mb-4" />
                               <p className="text-sm font-mono uppercase text-gray-500">Aguardando comando de busca</p>
                           </div>
                       )}

@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-black text-slate-200 font-sans overflow-hidden transition-colors duration-300;
+  }
+  
+  /* LIGHT MODE ENGINE - BALANCED DESIGN */
+  body.light-mode {
+    @apply bg-gray-100 text-gray-800 !important;
+  }
+  
+  /* CABEÇALHO NO MODO CLARO */
+  body.light-mode header {
+     @apply bg-slate-300 border-slate-400 text-slate-900 shadow-sm !important;
+  }
+
+  /* LOGO BACKGROUND FIX - MODO CLARO (FADE) */
+  body.light-mode .logo-wrapper {
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 60%, transparent 100%) !important;
+      @apply rounded-full px-4 py-1 border-none shadow-none !important;
+  }
+  
+  /* ESTILOS DO TÍTULO NO MODO CLARO */
+  
+  /* Estado Padrão: PRETO (Conforme solicitado) */
+  body.light-mode header h1, 
+  body.light-mode header h1 span {
+      @apply text-slate-800 shadow-none transition-colors duration-300 !important;
+  }
+  
+  /* HOVER: CORES NEON (Mesmas do Dark Mode) com Sombra Forte para Leitura no Fundo Claro */
+  
+  /* "Neo" -> Cyan */
+  body.light-mode header .group:hover h1 span.group-hover\:text-cyan-400 { 
+      color: #00FFFF !important; 
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* Sombra escura para contraste */
+  }
+  /* "Geo" -> Fuchsia */
+  body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-500 { 
+      color: #FF00FF !important; 
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  /* "Hub" -> Yellow */
+  body.light-mode header .group:hover h1 span.group-hover\:text-yellow-500 { 
+      color: #CFFF04 !important; 
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  
+  /* ".v3" Suffix */
+  body.light-mode header h1 span.text-fuchsia-500 { 
+      @apply text-fuchsia-700 !important; /* Base state visível */
+  }
+  body.light-mode header .group:hover h1 span.group-hover\:text-fuchsia-400 {
+       color: #FF00FF !important; /* Neon no hover */
+       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  /* Subtítulo - Preto/Cinza Escuro no Light Mode */
+  body.light-mode header .text-cyan-600 { 
+      @apply text-slate-700 font-bold !important;
+  }
+
+  /* Ícones e textos secundários do header no modo claro */
+  body.light-mode header .text-gray-500 { @apply text-slate-600 !important; }
+  body.light-mode header .text-gray-400 { @apply text-slate-500 !important; }
+  
+  /* Buttons inside header light mode */
+  body.light-mode header button:hover { background-color: rgba(255,255,255,0.4) !important; }
+  body.light-mode header .bg-\[\#1a1a1a\] { @apply bg-slate-100 border-slate-300 !important; } 
+  body.light-mode header .border-\[\#222\] { @apply border-slate-400 !important; }
+
+  /* SIDEBAR & PANELS - Clean White/Light Gray in Light Mode */
+  body.light-mode aside,
+  body.light-mode .bg-\[\#050505\], 
+  body.light-mode .bg-black,
+  body.light-mode .bg-\[\#0a0a0a\],
+  body.light-mode .bg-\[\#080808\],
+  body.light-mode .bg-black\/90,
+  body.light-mode .bg-black\/80 {
+    @apply bg-white border-gray-200 text-gray-900 shadow-sm !important;
+  }
+
+  /* Inputs & Cards in Light Mode */
+  body.light-mode .bg-\[\#111\],
+  body.light-mode .bg-\[\#161616\],
+  body.light-mode .bg-\[\#1a1a1a\] {
+    @apply bg-gray-50 border-gray-300 !important;
+  }
+  
+  /* GRADIENT OVERRIDES FOR LIGHT MODE */
+  body.light-mode .from-\[\#0a0a0a\] { --tw-gradient-from: #f8fafc !important; } /* Slate 50 */
+  body.light-mode .to-\[\#050505\] { --tw-gradient-to: #e2e8f0 !important; } /* Slate 200 */
+  
+  /* Transparências / Overlays */
+  body.light-mode .bg-black\/60,
+  body.light-mode .bg-black\/70,
+  body.light-mode .bg-black\/50,
+  body.light-mode .backdrop-blur-md {
+     background-color: rgba(255, 255, 255, 0.85) !important;
+     @apply border-slate-300 text-black !important;
+  }
+  
+  body.light-mode .bg-black\/95 {
+      background-color: rgba(255, 255, 255, 0.98) !important;
+      @apply text-black !important;
+  }
+
+  /* Text Colors (Exceto Header) */
+  body.light-mode :not(header) .text-gray-500,
+  body.light-mode :not(header) .text-gray-400,
+  body.light-mode :not(header) .text-gray-300 {
+    color: theme('colors.gray.600') !important;
+  }
+  body.light-mode :not(header) .text-gray-200,
+  body.light-mode :not(header) .text-white {
+     color: theme('colors.gray.900') !important;
+  }
+  body.light-mode :not(header) .text-gray-700 {
+     color: theme('colors.gray.700') !important;
+  }
+  
+  /* Accent Colors - Tuned for Light Backgrounds (Exceto Header) */
+  body.light-mode :not(header) .text-yellow-500 { color: theme('colors.lime.600') !important; text-shadow: none; }
+  body.light-mode :not(header) .text-cyan-400,
+  body.light-mode :not(header) .text-cyan-500 { color: theme('colors.cyan.600') !important; text-shadow: none; }
+  body.light-mode :not(header) .text-fuchsia-500,
+  body.light-mode :not(header) .text-fuchsia-400 { color: theme('colors.fuchsia.600') !important; text-shadow: none; }
+
+  /* Borders */
+  body.light-mode :not(header) .border-\[\#222\],
+  body.light-mode :not(header) .border-\[\#333\],
+  body.light-mode :not(header) .border-\[\#444\],
+  body.light-mode :not(header) .border-white\/10 {
+    border-color: theme('colors.gray.200') !important;
+  }
+  
+  /* Typography */
+  .font-code { font-family: 'Fira Code', 'JetBrains Mono', monospace; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+}

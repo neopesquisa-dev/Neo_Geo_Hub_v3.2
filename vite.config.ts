@@ -12,10 +12,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     publicDir: 'public',
     server: {
-      headers: {
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-      }
+      // Headers removed to allow external map tiles (CORP blocking)
     },
     define: {
       // Prioriza VITE_API_KEY, depois tenta GOOGLE_API_KEY ou API_KEY

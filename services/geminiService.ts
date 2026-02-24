@@ -1,9 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Helper para garantir a recuperação da chave
-// A chave é injetada via 'define' no vite.config.ts, substituindo process.env.API_KEY pelo valor real.
+// A chave é injetada via 'define' no vite.config.ts ou via import.meta.env
 const getApiKey = (): string => {
-  return process.env.API_KEY || "";
+  // Prioriza import.meta.env.VITE_API_KEY (padrão Vite)
+  if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
+  
+  // Fallback para process.env.API_KEY (definido via vite.config.ts)
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      return process.env.API_KEY;
+  }
+  
+  return "";
 };
 
 // Analysis for GIS context (Relatório Geral)

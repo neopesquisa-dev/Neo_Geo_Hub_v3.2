@@ -5,32 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Neo Geo Hub .v³ - Digital Twin Platform</title>
-    <!-- Tailwind via CDN is fine for simple migration -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              yellow: {
-                500: '#CFFF04', /* Neon Yellow Principal */
-                600: '#A4CC00', /* Contraste para Texto */
-                400: '#DBFF4D', /* Hover */
-                900: '#2A3300', /* Fundo profundo */
-              },
-              fuchsia: {
-                500: '#FF00FF',
-              },
-              cyan: {
-                500: '#00FFFF',
-              }
-            },
-            screens: {
-              'xs': '380px',
-            }
-          }
-        }
-      }
+      // Tailwind config removed - using build process
     </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <!-- EXIF JS script tag kept for compatibility -->
@@ -58,10 +34,10 @@
       
       /* CABEÇALHO NO MODO CLARO */
       body.light-mode header {
-         background-color: #94a3b8 !important; /* Slate 400 - Cinza médio para suportar texto preto e hover neon */
-         border-color: #64748b !important; /* Slate 500 */
+         background-color: #cbd5e1 !important; /* Slate 300 - Distinct Gray Tone */
+         border-color: #94a3b8 !important; /* Slate 400 */
          color: #0f172a !important; /* Slate 900 */
-         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
 
       /* LOGO BACKGROUND FIX - MODO CLARO (FADE) */
@@ -78,7 +54,7 @@
       /* Estado Padrão: PRETO (Conforme solicitado) */
       body.light-mode header h1, 
       body.light-mode header h1 span {
-          color: #000000 !important; /* Texto Preto Original */
+          color: #1e293b !important; /* Slate 800 */
           text-shadow: none;
           transition: color 0.3s ease, text-shadow 0.3s ease;
       }
@@ -112,18 +88,18 @@
 
       /* Subtítulo - Preto/Cinza Escuro no Light Mode */
       body.light-mode header .text-cyan-600 { 
-          color: #1e293b !important; /* Slate 800 */
+          color: #334155 !important; /* Slate 700 */
           font-weight: 700; 
       }
 
       /* Ícones e textos secundários do header no modo claro */
-      body.light-mode header .text-gray-500 { color: #334155 !important; } /* Slate 700 */
-      body.light-mode header .text-gray-400 { color: #475569 !important; } /* Slate 600 */
+      body.light-mode header .text-gray-500 { color: #475569 !important; } /* Slate 600 */
+      body.light-mode header .text-gray-400 { color: #64748b !important; } /* Slate 500 */
       
       /* Buttons inside header light mode */
-      body.light-mode header button:hover { background-color: rgba(255,255,255,0.2) !important; }
-      body.light-mode header .bg-\[\#1a1a1a\] { background-color: #e2e8f0 !important; border-color: #94a3b8 !important; } 
-      body.light-mode header .border-\[\#222\] { border-color: #64748b !important; }
+      body.light-mode header button:hover { background-color: rgba(255,255,255,0.4) !important; }
+      body.light-mode header .bg-\[\#1a1a1a\] { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; } 
+      body.light-mode header .border-\[\#222\] { border-color: #94a3b8 !important; }
 
       /* SIDEBAR & PANELS - Clean White/Light Gray in Light Mode */
       body.light-mode aside,
@@ -147,13 +123,23 @@
         border-color: #d1d5db !important; /* Gray 300 */
       }
       
+      /* GRADIENT OVERRIDES FOR LIGHT MODE */
+      body.light-mode .from-\[\#0a0a0a\] { --tw-gradient-from: #f8fafc !important; } /* Slate 50 */
+      body.light-mode .to-\[\#050505\] { --tw-gradient-to: #e2e8f0 !important; } /* Slate 200 */
+      
       /* Transparências / Overlays */
       body.light-mode .bg-black\/60,
       body.light-mode .bg-black\/70,
+      body.light-mode .bg-black\/50,
       body.light-mode .backdrop-blur-md {
-         background-color: rgba(255, 255, 255, 0.8) !important;
-         border-color: #e5e7eb !important;
+         background-color: rgba(255, 255, 255, 0.85) !important;
+         border-color: #cbd5e1 !important;
          color: #000 !important;
+      }
+      
+      body.light-mode .bg-black\/95 {
+          background-color: rgba(255, 255, 255, 0.98) !important;
+          color: #000 !important;
       }
 
       /* Text Colors (Exceto Header) */
@@ -166,6 +152,9 @@
       body.light-mode :not(header) .text-white {
          color: #111827 !important; /* Almost Black */
       }
+      body.light-mode :not(header) .text-gray-700 {
+         color: #374151 !important; /* Gray 700 - Darker in light mode */
+      }
       
       /* Accent Colors - Tuned for Light Backgrounds (Exceto Header) */
       body.light-mode :not(header) .text-yellow-500 { color: #65a30d !important; text-shadow: none; } /* Lime-600 */
@@ -177,6 +166,7 @@
       /* Borders */
       body.light-mode :not(header) .border-\[\#222\],
       body.light-mode :not(header) .border-\[\#333\],
+      body.light-mode :not(header) .border-\[\#444\],
       body.light-mode :not(header) .border-white\/10 {
         border-color: #e5e7eb !important; 
       }
@@ -224,7 +214,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>

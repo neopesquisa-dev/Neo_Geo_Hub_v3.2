@@ -252,12 +252,31 @@ const App: React.FC = () => {
         let splatBlob: Blob | null = null;
         try {
             console.log("Buscando Splat:", DEMO_DATA_URLS.SPLAT);
-            // Tenta carregar da URL Remota (Github Media)
+            // Tenta carregar da URL configurada
             const splatResponse = await fetch(DEMO_DATA_URLS.SPLAT);
             
             if (!splatResponse.ok) throw new Error(`Remote Fetch Status: ${splatResponse.status}`);
             
-            const tempBlob = await splatResponse.blob();
+            let tempBlob = await splatResponse.blob();
+
+            // Se for muito pequeno (< 2KB), pode ser um ponteiro LFS. Tentar URL media como fallback.
+            if (tempBlob.size < 2000 && DEMO_DATA_URLS.SPLAT.includes('raw.githubusercontent.com')) {
+                 console.warn("Blob muito pequeno, possível ponteiro LFS. Tentando URL media...");
+                 const mediaUrl = DEMO_DATA_URLS.SPLAT.replace('raw.githubusercontent.com', 'media.githubusercontent.com/media');
+                 try {
+                    const mediaResponse = await fetch(mediaUrl);
+                    if (mediaResponse.ok) {
+                        const mediaBlob = await mediaResponse.blob();
+                        if (mediaBlob.size > 2000) {
+                            tempBlob = mediaBlob;
+                            console.log("Sucesso com URL media fallback.");
+                        }
+                    }
+                 } catch (e) {
+                    console.warn("Falha no fallback media URL", e);
+                 }
+            }
+
             // Verificar se o que baixou é realmente um arquivo binário e não uma página HTML de erro 404/github
             if (tempBlob.type.includes("text/html") || tempBlob.size < 1000) {
                 throw new Error("Invalid content type or size (likely HTML error page)");

@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Layer, GeoImage, PhotoLayer } from '../types';
 import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Navigation, AlertTriangle } from 'lucide-react';
 
 interface MapViewProps {
